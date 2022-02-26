@@ -1,0 +1,61 @@
+---
+title: "ST404_Assignment_2"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Findings
+
+# Statistical Methodology
+
+## Cleaning The Data
+
+With consideration to the EDA completed in assignment 1, we do the following to clean the data:
+
+* Multiplied the values between 0 and 0.1 in AvgHouseholdSize by 100
+* Remove the PctEmployed16_Over column to remove missing values
+* Several outliers may be considered for removal if they have too high leverage including those discussed in assignment 1
+
+## Transformations
+
+Due to the large quantity of variables, it is important to keep the model simple so that it is easy to interpret and maintains explanatory power. Therefore, transformations of variables have not been done lightly.
+
+Firstly, looking at skewed variables, we perform transformations of the left-skewed variables PctPrivateCoverage and PercentMarried, and the right-skewed variables PctBlack, IncidenceRate, medianIncome, AvgHouseholdSize, PctUnemployed16_Over and PovertyPercent. This does not totally remove skew from PctBlack but does reduce it substantially. These transformations were discussed in assignment 1 and are listed below.
+
+Secondly, to deal with variables showing signs of heteroskedasticity, we log transform deathRate, the dependent variable. This includes the variables medianIncome, PctPrivateCoverage, PctEmpPrivCoverage and PctPublicCoverage.
+
+List of transformed variables with associated transformation:
+
+* PctPrivateCoverage^2^
+* PercentMarried^2^
+* log(PctBlack$+1$)
+* log(IncidenceRate)
+* log(medianIncome)
+* log(AvgHouseholdSize)
+* PctUnemplyed16_over^$\frac{1}{2}$^
+* PovertyPercent^$\frac{1}{5}$
+* log(deathRate)
+
+These transformations will be completed within the model itself in order for the variable names to retain their true meaning.
+
+# Appendix
+
+Loading the data
+```{r}
+load("C:\\Users\\conro\\Downloads\\cancer.RData")
+attach(cancer)
+```
+
+
+Cleaning the data
+```{r}
+AvgHouseholdSize[AvgHouseholdSize <= 0.5] <- AvgHouseholdSize[AvgHouseholdSize <= 0.5]*100
+cancer <- cancer[,-10] #PctEmployed16_Over is the 10th column, which we remove
+```
+
+

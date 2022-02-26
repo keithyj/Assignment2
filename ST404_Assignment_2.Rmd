@@ -47,14 +47,14 @@ These transformations will be completed within the model itself in order for the
 
 Loading the data
 ```{r}
-load("C:\\Users\\conro\\Downloads\\cancer.RData")
+load("cancer.RData")
 attach(cancer)
 ```
 
 
 Cleaning the data
 ```{r}
-AvgHouseholdSize[AvgHouseholdSize <= 0.5] <- AvgHouseholdSize[AvgHouseholdSize <= 0.5]*100
+AvgHouseholdSize[AvgHouseholdSize <= 0.1] <- AvgHouseholdSize[AvgHouseholdSize <= 0.1]*100
 cancer <- cancer[,-10] #PctEmployed16_Over is the 10th column, which we remove
 ```
 

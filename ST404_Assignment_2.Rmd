@@ -70,7 +70,85 @@ List of potential transformed variables with associated transformation:
 These potential transformations will be completed within the model itself in order for the variable names to retain their true meaning.
 
 ## Modelling and Variable Selection
-# AIC and BIC
+### Stepwise Regression
+
+**Without transformations**
+
+Code that defines the maximum complexity, all variables included, and the minimum complexity, only an intercept term. It then runs stepwise regression using both AIC and BIC to determine the steps.
+
+```{r}
+fullModel=lm(deathRate~incidenceRate+medIncome+povertyPercent+MedianAgeMale+
+               MedianAgeFemale+AvgHouseholdSize+PercentMarried+
+               PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
+               PctPublicCoverage+PctBlack+PctMarriedHouseholds+Edu18_24,data=cancer)
+nullModel=lm(deathRate~1,data=cancer)
+```
+
+```{r}
+aicModel=step(nullModel,direction='both',scope=formula(fullModel),trace=0,k=2)
+summary(aicModel)
+```
+
+This contains 12 variables, all are significant at the 5% level and 9 of them are significant at the 0.1% level. There are, however, a lot of variables which makes the model harder to interpret, however the predictive power should be good.
+
+```{r}
+bicModel=step(fullModel,direction='both',scope=formula(nullModel),trace=0,k=log(3047))
+summary(bicModel)
+```
+
+This contains 9 variables and so is easier to interpret but the predictive power may not be as good. All but one are significant at the 0.1% level.
+
+**With transformations**
+
+First we apply the transformations and create a separate transformed dataset, then we define the bounds of the complexity of our model. Then we do the same as above and perform stepwise regression on this dataset using both AIC and BIC.
+
+```{r}
+cancer2=cancer
+cancer2$deathRate=log(deathRate)
+cancer2$incidenceRate=log(incidenceRate)
+cancer2$medIncome=log(medIncome)
+cancer2$AvgHouseholdSize=log(AvgHouseholdSize)
+cancer2$PercentMarried=PercentMarried^2
+cancer2$PctUnemployed16_Over= sqrt(PctUnemployed16_Over)
+cancer2$PctPrivateCoverage= PctPrivateCoverage^2
+cancer2$PctBlack = log(PctBlack+1)
+fullTransModel=lm(deathRate~incidenceRate+medIncome+povertyPercent+MedianAgeMale+
+               MedianAgeFemale+AvgHouseholdSize+PercentMarried+
+               PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
+               PctPublicCoverage+PctBlack+PctMarriedHouseholds+Edu18_24,data=cancer2)
+nullTransModel=lm(deathRate~1,data=cancer2)
+```
+
+```{r}
+aicTransModel=step(nullTransModel,direction='both',scope=formula(fullTransModel),trace=0,k=2)
+summary(aicTransModel)
+```
+
+This model contains 13 variables which is a lot of variables and would make it hard to interpret the model. Predictive power will be good but the complexity needs to be penalised more, so we will use the BIC instead.
+
+```{r}
+bicTransModel=step(nullTransModel,direction='both',scope=formula(fullTransModel),trace=0,k=log(3047))
+summary(bicTransModel)
+```
+
+This produces a model with 7 variables which is a lot more manageable and easy to interpret, it has a standard residual error that is only 0.0005 greater than the model that uses AIC. So it fits the data nearly as well, but there are far fewer variables. This model can even be further simplified because when the full output of the stepwise regression function is printed, the change in the value of the BIC is very little in the last steps compared to the first steps. We can simplify our model further by removing `PctBlack` and `PctPublicCoverage`. This reduces our R-squared value by 0.009 and our adjusted R-squared value by 0.0086 but it also removes two variables which makes the model simpler. All p-values for this model are below 0.0000000004, which is very low.
+
+```{r}
+altBICTransModel=lm(deathRate~incidenceRate+medIncome+PctPrivateCoverage+
+                 PctEmpPrivCoverage+Edu18_24,data=cancer2)
+summary(altBICTransModel)
+```
+
+**Multicollinearity**
+
+```{r}
+require(olsrr)
+summary(altBICTransModel)
+ols_coll_diag(altBICTransModel)
+```
+
+There are issues here in the condition numbers and the variables that contribute to them. medIncome and incidenceRate variables appear to be the issue. These are not correlated yet they seem to explain the same variance in the deathRate but both are very important in prediction. As a result it is likely best that both remain in the model due to the fact removing one would have a massive impact on the prediction power of our model. 
+
 
 # Ridge Regression
 Performing a Ridge regression will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 

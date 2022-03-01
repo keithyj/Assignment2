@@ -22,7 +22,7 @@ Our findings are based off the preliminary EDA of the US Cancer Dataset.
 ### Missing Values
 As declared in the EDA, missing values exist in PctEmployed16_Over and extremely low values exist in AvgHouseholdSize. We will clean the data in the following way:
 
-* Multiply (Scale?) the values between 0 and 0.1 in AvgHouseholdSize by 100. (Show in Appendix a fixed histogram?)
+* Scale the values between 0 and 0.1 in AvgHouseholdSize by 100. **See Appendix**
 * Remove the PctEmployed16_Over column containing missing values. (Explanation of why?)
 
 ``` {r ScaleColumn, echo = FALSE}
@@ -187,7 +187,10 @@ Loading the data
 load("cancer.RData")
 attach(cancer)
 ```
-
+```{r histogramAvgHouseholdSize included, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE, fig.asp = 0.3, fig.cap = "Histograms of AvgHouseholdSize after scaling"}
+par(mfrow = c(1,4))
+hist(cancer2$AvgHouseholdSize, breaks = 30, main = "AvgHouseholdSize", ylab = "Frequency", xlab = "AvgHouseholdSize")
+```
 
 Cleaning the data
 ```{r}

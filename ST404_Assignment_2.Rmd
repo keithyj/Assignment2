@@ -43,7 +43,7 @@ plot(lm(deathRate ~ incidenceRate,data=cancer),4)
 plot(lm(deathRate ~ .,data=cancer[-c(1,4)]),4)
 ```
 Cook's distance gives us sufficient evidence to remove the outlier in incidenceRate
-``` {r removeWilliamsburg}
+``` {r removeWilliamsburg, include = FALSE}
 cancer <- cancer[-1490,] 
 ```
 

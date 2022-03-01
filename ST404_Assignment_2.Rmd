@@ -182,6 +182,18 @@ It will be better to use another penalized likelihood method such as LASSO. Howe
 
 # Appendix
 
+Loading packages
+```{r}
+if(!require(tidyr)){
+  install.packages("tidyr")
+  library(tidyr)
+}
+if(!require(dpylr)){
+  install.packages("dpylr")
+  library(dplyr)
+}
+```
+
 Loading the data
 ```{r}
 load("cancer.RData")
@@ -196,6 +208,19 @@ Cleaning the data
 ```{r}
 AvgHouseholdSize[AvgHouseholdSize <= 0.1] <- AvgHouseholdSize[AvgHouseholdSize <= 0.1]*100
 cancer <- subset(cancer, select=-c(PctEmployed16_Over)) 
+```
+
+Creating a Region variable, as a factor
+```{r}
+cancer2 = separate(cancer,"Geography",c("County","State"),sep = ", ")
+cancer2 <- cancer2 %>%
+  mutate(Region = case_when(
+    State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
+    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
+    State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
+    State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
+  ))
+cancer2$Region <-  factor(cancer2$Region)
 ```
 
 

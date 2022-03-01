@@ -8,28 +8,54 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+```{r, include = FALSE}
+load("cancer.RData")
+attach(cancer)
+```
 # Findings
 
 # Statistical Methodology
 
+Our findings are based off the preliminary EDA of the US Cancer Dataset.
+
 ## Cleaning The Data
+### Missing Values
+As declared in the EDA, missing values exist in PctEmployed16_Over and extremely low values exist in AvgHouseholdSize. We will clean the data in the following way:
 
-With consideration to the EDA completed in assignment 1, we do the following to clean the data:
+* Multiply (Scale?) the values between 0 and 0.1 in AvgHouseholdSize by 100. (Show in Appendix a fixed histogram?)
+* Remove the PctEmployed16_Over column containing missing values. (Explanation of why?)
 
-* Multiplied the values between 0 and 0.1 in AvgHouseholdSize by 100
-* Remove the PctEmployed16_Over column to remove missing values
-* Several outliers may be considered for removal if they have too high leverage including those discussed in assignment 1
+``` {r ScaleColumn, echo = FALSE}
+# Multiply values less than 1 by 100 and replace column
+AvgHouseholdSize[AvgHouseholdSize <= 0.1] <- AvgHouseholdSize[AvgHouseholdSize <= 0.1]*100
+```
+``` {r RemoveMissingValuesColumn, echo = FALSE}
+cancer <- subset(cancer, select=-c(PctEmployed16_Over))
+```
+
+### Outliers
+Several predictor variables may have outliers that can be considered for removal if they have a high leverage, specifically, incidenceRate. We will look at Cook's distance to declare if any of these outliers have significant influence.
+
+``` {CheckOutliers, echo = FALSE}
+par(mfrow=c(1,2))
+# Plot the cook's distance
+plot(lm(deathRate ~ incidenceRate,data=cancer),4)
+plot(lm(deathRate ~ .,data=cancer[-c(1,4)]),4)
+```
+Do we remove the Williamsburg one?
 
 ## Transformations
 
-Due to the large quantity of variables, it is important to keep the model simple so that it is easy to interpret and maintains explanatory power. Therefore, transformations of variables have not been done lightly.
+Due to the large quantity of variables, it is important to keep the model simple so that it is easy to interpret and maintains explanatory power.
 
-Firstly, looking at skewed variables, we perform transformations of the left-skewed variables PctPrivateCoverage and PercentMarried, and the right-skewed variables PctBlack, IncidenceRate, medianIncome, AvgHouseholdSize, PctUnemployed16_Over and PovertyPercent. This does not totally remove skew from PctBlack but does reduce it substantially. These transformations were discussed in assignment 1 and are listed below.
+Firstly, looking at skewed variables, we could perform transformations of the left-skewed variables PctPrivateCoverage and PercentMarried, and the right-skewed variables PctBlack (after a shift of 0.05 due to some values being 0), IncidenceRate, medIncome, AvgHouseholdSize, PctUnemployed16_Over and PovertyPercent. This does not totally remove skew from PctBlack but does reduce it substantially. These transformations were discussed in assignment 1 and are listed below.
 
-Secondly, to deal with variables showing signs of heteroskedasticity, we log transform deathRate, the dependent variable. This includes the variables medianIncome, PctPrivateCoverage, PctEmpPrivCoverage and PctPublicCoverage.
+Secondly, to deal with variables showing signs of heteroscedasticity, we could log transform deathRate, the dependent variable. This includes the variables medianIncome, PctPrivateCoverage, PctEmpPrivCoverage and PctPublicCoverage.
 
-List of transformed variables with associated transformation:
+Should we do some tests using diagnosis methods we can now use and decide which ones we actually wish to transform? i.e spreadlevelplot, residual plots etc.
+
+
+List of potential transformed variables with associated transformation:
 
 * PctPrivateCoverage^2^
 * PercentMarried^2^
@@ -41,7 +67,7 @@ List of transformed variables with associated transformation:
 * PovertyPercent^$\frac{1}{5}$
 * log(deathRate)
 
-These transformations will be completed within the model itself in order for the variable names to retain their true meaning.
+These potential transformations will be completed within the model itself in order for the variable names to retain their true meaning.
 
 # Appendix
 
@@ -55,7 +81,7 @@ attach(cancer)
 Cleaning the data
 ```{r}
 AvgHouseholdSize[AvgHouseholdSize <= 0.1] <- AvgHouseholdSize[AvgHouseholdSize <= 0.1]*100
-cancer <- cancer[,-10] #PctEmployed16_Over is the 10th column, which we remove
+cancer <- subset(cancer, select=-c(PctEmployed16_Over)) 
 ```
 
 

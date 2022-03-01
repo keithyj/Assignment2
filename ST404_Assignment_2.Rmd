@@ -36,7 +36,7 @@ cancer <- subset(cancer, select=-c(PctEmployed16_Over))
 ### Outliers
 Several predictor variables may have outliers that can be considered for removal if they have a high leverage, specifically, incidenceRate. We will look at Cook's distance to declare if any of these outliers have significant influence.
 
-``` {CheckOutliers, echo = FALSE}
+``` {r CheckOutliers, echo = FALSE}
 par(mfrow=c(1,2))
 # Plot the cook's distance
 plot(lm(deathRate ~ incidenceRate,data=cancer),4)

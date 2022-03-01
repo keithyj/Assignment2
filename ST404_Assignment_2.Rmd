@@ -69,6 +69,36 @@ List of potential transformed variables with associated transformation:
 
 These potential transformations will be completed within the model itself in order for the variable names to retain their true meaning.
 
+## Modelling and Variable Selection
+# AIC and BIC
+
+# Ridge Regression
+Performing a Ridge regression will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 
+It should be used in a scenario when the # of parameters is large or when multicollinearity/collinearity exists between variables.
+It will increase the bias that exists in the model, which in turn can reduce mean square error by improving variance. Despite this bias the Ridge Regression estimates will have a lower mean square error than least squared estimator.
+It will be better to use another penalized likelihood method such as LASSO. However, could be potential to use it after fitting some models to improve predictive power.
+
+# LASSO
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Appendix
 
 Loading the data

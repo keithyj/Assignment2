@@ -42,7 +42,10 @@ par(mfrow=c(1,2))
 plot(lm(deathRate ~ incidenceRate,data=cancer),4)
 plot(lm(deathRate ~ .,data=cancer[-c(1,4)]),4)
 ```
-Do we remove the Williamsburg one?
+Cook's distance gives us sufficient evidence to remove the outlier in incidenceRate
+``` {r removeWilliamsburg}
+cancer <- cancer[-1490,] 
+```
 
 ## Transformations
 

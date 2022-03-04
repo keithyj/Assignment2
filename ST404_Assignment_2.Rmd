@@ -26,7 +26,7 @@ As declared in the EDA, missing values exist in PctEmployed16_Over and extremely
 * Remove the PctEmployed16_Over column containing missing values. (Explanation of why?)
 
 ``` {r ScaleColumn, echo = FALSE}
-# Multiply values less than 1 by 100 and replace column
+# Multiply values less than 0.1 by 100 and replace column
 AvgHouseholdSize[AvgHouseholdSize <= 0.1] <- AvgHouseholdSize[AvgHouseholdSize <= 0.1]*100
 ```
 ``` {r RemoveMissingValuesColumn, echo = FALSE}
@@ -42,9 +42,9 @@ par(mfrow=c(1,2))
 plot(lm(deathRate ~ incidenceRate, data=cancer), 4)
 plot(lm(deathRate ~ ., data=cancer[-c(1,4)]), 4)
 ```
-Cook's distance, using all predictor variables, shows us that incidence rate has high influence and so gives us sufficient evidence to remove the outlier in incidenceRate.
+Cook's distance, using all predictor variables, shows us that Williamsburg city in Virginia has an incidence rate with high influence and so gives us sufficient evidence to remove the outlier in incidenceRate.
 ``` {r removeWilliamsburg, include = FALSE}
-cancer <- filter(cancer, incidenceRate <= 900) 
+cancer <- filter(cancer, incidenceRate != 1014.2)  
 ```
 
 ## Transformations

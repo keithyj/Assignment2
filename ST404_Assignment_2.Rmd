@@ -173,6 +173,36 @@ summary(altBICTransModel)
 require(olsrr)
 summary(altBICTransModel)
 ols_coll_diag(altBICTransModel)
+
+#Swap medIncome with povertyPercent
+altBICTransModel=lm(deathRate~incidenceRate+povertyPercent+PctPrivateCoverage+
+                      PctEmpPrivCoverage+Edu18_24,data=cancer2)
+summary(altBICTransModel)
+ols_coll_diag(altBICTransModel)
+extractAIC(altBICTransModel,k=log(3047))
+
+
+#Remove intercept term
+altBICTransModel=lm(deathRate~0+incidenceRate+povertyPercent+PctPrivateCoverage+
+                      PctEmpPrivCoverage+Edu18_24,data=cancer2)
+summary(altBICTransModel)
+ols_coll_diag(altBICTransModel)
+extractAIC(altBICTransModel,k=log(3047))
+
+
+#Remove PctEmpPrivCoverage
+altBICTransModel=lm(deathRate~0+incidenceRate+povertyPercent+PctPrivateCoverage+
+                      Edu18_24,data=cancer2)
+summary(altBICTransModel)
+ols_coll_diag(altBICTransModel)
+extractAIC(altBICTransModel,k=log(3047))
+
+#Remove Edu18_24
+altBICTransModel=lm(deathRate~0+incidenceRate+povertyPercent+PctPrivateCoverage,
+                    data=cancer2)
+summary(altBICTransModel)
+ols_coll_diag(altBICTransModel)
+extractAIC(altBICTransModel,k=log(3047))
 ```
 
 There are issues here in the condition numbers and the variables that contribute to them. medIncome and incidenceRate variables appear to be the issue. These are not correlated yet they seem to explain the same variance in the deathRate but both are very important in prediction. As a result it is likely best that both remain in the model due to the fact removing one would have a massive impact on the prediction power of our model. 

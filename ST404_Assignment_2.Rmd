@@ -39,10 +39,10 @@ Several predictor variables may have outliers that can be considered for removal
 ``` {r CheckOutliers, echo = FALSE}
 par(mfrow=c(1,2))
 # Plot the cook's distance
-plot(lm(deathRate ~ incidenceRate,data=cancer),4)
-plot(lm(deathRate ~ .,data=cancer[-c(1,4)]),4)
+plot(lm(deathRate ~ incidenceRate, data=cancer), 4)
+plot(lm(deathRate ~ ., data=cancer[-c(1,4)]), 4)
 ```
-Cook's distance gives us sufficient evidence to remove the outlier in incidenceRate
+Cook's distance, using all predictor variables, shows us that incidence rate has high influence and so gives us sufficient evidence to remove the outlier in incidenceRate.
 ``` {r removeWilliamsburg, include = FALSE}
 cancer <- cancer[-1490,] 
 ```
@@ -51,9 +51,9 @@ cancer <- cancer[-1490,]
 
 Due to the large quantity of variables, it is important to keep the model simple so that it is easy to interpret and maintains explanatory power.
 
-Firstly, looking at skewed variables, we could perform transformations of the left-skewed variables PctPrivateCoverage and PercentMarried, and the right-skewed variables PctBlack (after a shift of 0.05 due to some values being 0), IncidenceRate, medIncome, AvgHouseholdSize, PctUnemployed16_Over and PovertyPercent. This does not totally remove skew from PctBlack but does reduce it substantially. These transformations were discussed in assignment 1 and are listed below.
+Firstly, looking at skewed variables, we could perform transformations of the left-skewed variables PctPrivateCoverage and PercentMarried, and the right-skewed variables PctBlack (after a shift of 0.1 due to some values being 0), IncidenceRate, medIncome, AvgHouseholdSize, PctUnemployed16_Over and PovertyPercent. This does not totally remove skew from PctBlack but does reduce it substantially. These transformations were discussed in assignment 1 and are listed below.
 
-Secondly, to deal with variables showing signs of heteroscedasticity, we could log transform deathRate, the dependent variable. This includes the variables medianIncome, PctPrivateCoverage, PctEmpPrivCoverage and PctPublicCoverage.
+Secondly, to deal with variables showing signs of heteroscedasticity, we could log transform deathRate, the dependent variable. This includes the variables medIncome, PctPrivateCoverage, PctEmpPrivCoverage and PctPublicCoverage.
 
 Should we do some tests using diagnosis methods we can now use and decide which ones we actually wish to transform? i.e spreadlevelplot, residual plots etc.
 
@@ -62,13 +62,38 @@ List of potential transformed variables with associated transformation:
 
 * PctPrivateCoverage^2^
 * PercentMarried^2^
-* log(PctBlack$+1$)
+* log(PctBlack$+0.1$)
 * log(IncidenceRate)
 * log(medianIncome)
 * log(AvgHouseholdSize)
 * PctUnemplyed16_over^$\frac{1}{2}$^
 * PovertyPercent^$\frac{1}{5}$
 * log(deathRate)
+
+The following residual plots will allow us to see if homoscedasticity is fixed for these variables after transformations.
+
+``` {r transformations, echo = FALSE}
+cancer2=cancer
+cancer2$deathRate=log(deathRate)
+cancer2$incidenceRate=log(incidenceRate)
+cancer2$medIncome=log(medIncome)
+cancer2$AvgHouseholdSize=log(AvgHouseholdSize)
+cancer2$PercentMarried=PercentMarried^2
+cancer2$PctUnemployed16_Over= sqrt(PctUnemployed16_Over)
+cancer2$PctPrivateCoverage= PctPrivateCoverage^2
+cancer2$PctBlack = log(PctBlack+0.1)
+```
+
+``` {r residualplots, echo = FALSE}
+par(mfrow=c(1,4))
+plot(lm(deathRate ~ incidenceRate, data=cancer2), 1)
+plot(lm(deathRate ~ medIncome, data=cancer2), 1)
+plot(lm(deathRate ~ AvgHouseholdSize, data=cancer2), 1)
+plot(lm(deathRate ~ PercentMarried, data=cancer2), 1)
+plot(lm(deathRate ~ PctUnemployed16_Over, data=cancer2), 1)
+plot(lm(deathRate ~ PctPrivateCoverage, data=cancer2), 1)
+plot(lm(deathRate ~ PctBlack, data=cancer2), 1)
+```
 
 These potential transformations will be completed within the model itself in order for the variable names to retain their true meaning.
 
@@ -114,7 +139,7 @@ cancer2$AvgHouseholdSize=log(AvgHouseholdSize)
 cancer2$PercentMarried=PercentMarried^2
 cancer2$PctUnemployed16_Over= sqrt(PctUnemployed16_Over)
 cancer2$PctPrivateCoverage= PctPrivateCoverage^2
-cancer2$PctBlack = log(PctBlack+1)
+cancer2$PctBlack = log(PctBlack+0.1)
 fullTransModel=lm(deathRate~incidenceRate+medIncome+povertyPercent+MedianAgeMale+
                MedianAgeFemale+AvgHouseholdSize+PercentMarried+
                PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+

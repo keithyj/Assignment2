@@ -100,31 +100,23 @@ These potential transformations will be completed within the model itself in ord
 ## Modelling and Variable Selection
 ### Stepwise Regression
 
+**Initial Ideas**
+
+Before attempting to fit any models or try stepwise regression, we looked at what variables we thought would be most important in determining the death rate within a county. We came to the conclusion that incidence rate would be the most important. Median income within a region as well as the type of health coverage in that region would be important. The median age in a county may also affect the death rate. Additionally, an intercept may need to be excluded as it makes no sense to predict the death rate to be greater than zero when all variables (particularly incidence rate) are equal to zero.
+
+We also looked at combinations of variables that could be problematic if they are in the same model. This was based heavily on the correlation between variables, which is visualised by the matrix below: 
+
+```{r, echo=FALSE,message=FALSE}
+require(corrplot)
+correlations1 <- cor(cancer[,c(2,3,5:17)],method='spearman')
+corrplot(correlations1,method='square',title='Spearman Correlation plot', tl.col="black", tl.cex=0.6,mar=c(1,1,1,1))
+```
+
+The matrix shows that we should not include more than one variable explaining the type of health coverage, both of `povertyPercent` and `medIncome`, both of the median age variables and both of the marriage rate variables. 
+
 **Without transformations**
 
-Code that defines the maximum complexity, all variables included, and the minimum complexity, only an intercept term. It then runs stepwise regression using both AIC and BIC to determine the steps.
-
-```{r}
-fullModel=lm(deathRate~incidenceRate+medIncome+povertyPercent+MedianAgeMale+
-               MedianAgeFemale+AvgHouseholdSize+PercentMarried+
-               PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
-               PctPublicCoverage+PctBlack+PctMarriedHouseholds+Edu18_24,data=cancer)
-nullModel=lm(deathRate~1,data=cancer)
-```
-
-```{r}
-aicModel=step(nullModel,direction='both',scope=formula(fullModel),trace=0,k=2)
-summary(aicModel)
-```
-
-This contains 12 variables, all are significant at the 5% level and 9 of them are significant at the 0.1% level. There are, however, a lot of variables which makes the model harder to interpret, however the predictive power should be good.
-
-```{r}
-bicModel=step(fullModel,direction='both',scope=formula(nullModel),trace=0,k=log(3047))
-summary(bicModel)
-```
-
-This contains 9 variables and so is easier to interpret but the predictive power may not be as good. All but one are significant at the 0.1% level.
+Initially we attempted stepwise regression for the data set without any tranformations. Despite using both AIC and BIC, we had issues with there being too many parameters (10-12 parameters) and this meant that the model was not simple. As a result we chose to apply the transformations and see if that gave better results.
 
 **With transformations**
 

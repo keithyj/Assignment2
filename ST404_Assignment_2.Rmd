@@ -75,13 +75,13 @@ The following residual plots will allow us to see if homoscedasticity is fixed f
 ``` {r transformations, echo = FALSE}
 cancer2=cancer
 cancer2$deathRate=log(deathRate)
-cancer2$incidenceRate=log(incidenceRate)
+cancer2$incidenceRate=boxcox(incidenceRate, p = 1.5) #using boxcox from practical class 2, user defined funciton in appendix
 cancer2$medIncome=log(medIncome)
 cancer2$AvgHouseholdSize=log(AvgHouseholdSize)
 cancer2$PercentMarried=PercentMarried^2
-cancer2$PctUnemployed16_Over= sqrt(PctUnemployed16_Over)
-cancer2$PctPrivateCoverage= PctPrivateCoverage^2
-cancer2$PctBlack = log(PctBlack+0.1)
+cancer2$PctUnemployed16_Over=sqrt(PctUnemployed16_Over)
+cancer2$PctPrivateCoverage=PctPrivateCoverage^2
+cancer2$PctBlack=log(PctBlack+0.1)
 ```
 
 ``` {r residualplots, echo = FALSE}
@@ -221,9 +221,12 @@ Running a LASSO on the transformed data and using the min.lambda from cross vali
 Then extendning this we see an inclusion of a quadratic term for incidence rates. Interaction terms seemed to get messy so I decided not to include any. For this model I used the 1se lambda value. 
 This final model appears to have some issues with normality of residuals and maybe slight violations of homoscedascity. I need to explore this further.
 
+
+PLEASE IGNORE THIS 
+I found a mistake in my stuff, I'm working on it atm
 ```{r}
 require(glmnet) 
-#In this code I'm using cancer 2 as defined above with the changes that incidence rate is power transformed with a p value of 1.5. I'm going to change these above but if I haven't when someone is readign this then bear it in mind.
+#In this code I'm using cancer 2 as defined above with the changes that incidence rate is power transformed with a p value of 1.5. I'm going to change these above #but if I haven't when someone is readign this then bear it in mind. ALso included is the region, county and state variables Connor added.
 
 IncidenceSqrd <- cancer2[,3]^2
 cancerLASSO <- cancer2[,c(3,4,12,13)]
@@ -301,5 +304,20 @@ cancer2 <- cancer2 %>%
   ))
 cancer2$Region <-  factor(cancer2$Region)
 ```
+
+Power transformation UDF
+```{r}
+boxcox <- function(x, p){ 
+  if (p == 0){
+    return(log(x)) 
+  }
+  else{
+    return((x^p - 1)/p)
+  } 
+}
+```
+
+
+
 
 

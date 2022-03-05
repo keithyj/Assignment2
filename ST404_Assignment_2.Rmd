@@ -216,6 +216,29 @@ It will be better to use another penalized likelihood method such as LASSO. Howe
 
 # LASSO
 
+Summary: 
+Running a LASSO on the transformed data and using the min.lambda from cross validation gives less variables to include (in general it's standard to use the value of lambda which is 1se away). The variables were incidecne rate, median income, percent unemplyed and percent private cvoverage. I like this as well since these cover pretty much all the varibels we might intuitvely expect without using more than one variables measuring eseentially the same thing (ie: percent private and percent publc coverage).
+Then extendning this we see an inclusion of a quadratic term for incidence rates. Interaction terms seemed to get messy so I decided not to include any. For this model I used the 1se lambda value. 
+This final model appears to have some issues with normality of residuals and maybe slight violations of homoscedascity. I need to explore this further.
+
+```{r}
+require(glmnet) 
+
+IncidenceSqrd <- cancer2[,3]^2
+cancerLASSO <- cancer2[,c(3,4,12,13)]
+cancerLASSO <- cbind(cancerLASSO, IncidenceSqrd)
+
+LASSOfit <- glmnet(cancerLASSO, cancer2$deathRate, alpha = 1) #can be used for a plot 
+cvLASSO <- cv.glmnet(cancerLASSO, cancer2$deathRate, alpha = 1)
+
+LASSOcandidate <- glmnet(cancerLASSO, cancer2$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
+
+LASSOpredicted <- predict(LASSOcandidate, newx = cancerLASSO)
+LASSOresiduals <- cancer2$deathRate - LASSOpredicted
+#Note here that Union County is making plots look bad
+
+```
+
 
 
 

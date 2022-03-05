@@ -223,6 +223,7 @@ This final model appears to have some issues with normality of residuals and may
 
 ```{r}
 require(glmnet) 
+#In this code I'm using cancer 2 as defined above with the changes that incidence rate is power transformed with a p value of 1.5. I'm going to change these above but if I haven't when someone is readign this then bear it in mind.
 
 IncidenceSqrd <- cancer2[,3]^2
 cancerLASSO <- cancer2[,c(3,4,12,13)]

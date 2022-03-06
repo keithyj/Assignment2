@@ -272,40 +272,52 @@ LASSOresiduals <- cancer2$deathRate - LASSOpredicted
 
 # Appendix
 
-Correlation of employment variables
 ```{r}
+#Correlation of employment variables
 cancerNoNAs <- na.omit(cancerRaw)
 cor(cancerNoNAs$PctUnemployed16_Over,cancerNoNAs$PctEmployed16_Over)
 ```
 
-Cleaning the data
 ```{r,eval=FALSE}
+#Cleaning the data
 cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1]*100
 cancer <- subset(cancer, select=-c(PctEmployed16_Over)) 
 ```
 
 Showing fixed AvgHouseholdSize
-```{r histogramAvgHouseholdSize included, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE, fig.asp = 0.6, fig.cap = "Histograms of AvgHouseholdSize after scaling small values"}
+
+```{r histogramAvgHouseholdSize included, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE, fig.asp = 0.4, fig.cap = "Histograms of AvgHouseholdSize after scaling small values"}
 par(mfrow = c(1,2))
 hist(cancerRaw$AvgHouseholdSize, breaks = 30, main = "Raw AvgHouseholdSize", ylab = "Frequency", xlab = "AvgHouseholdSize")
 hist(cancer$AvgHouseholdSize, breaks = 30, main = "Corrected AvgHouseholdSize", ylab = "Frequency", xlab = "AvgHouseholdSize")
 ```
 
-Creating a Region variable, as a factor
+
 ```{r,eval=FALSE}
+#Creating a Region variable, as a factor
 cancer2 = separate(cancer,"Geography",c("County","State"),sep = ", ")
 cancer2 <- cancer2 %>%
   mutate(Region = case_when(
-    State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
-    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
-    State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
-    State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
+    State %in% c("New Hampshire","New Jersey","New York","Maine",
+                 "Massachusetts","Vermont","Connecticut","Pennsylvania",
+                 "Rhode Island") ~ "Northeast",
+    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota",
+                 "North Dakota","Missouri","Kansas","Ohio",
+                 "Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
+    State %in% c("West Virginia","Virginia","North Carolina","Alabama",
+                 "Arkansas","Tennessee","Texas","Louisiana",
+                 "Maryland","Mississippi","Kentucky","Delaware",
+                 "District of Columbia","Florida","Oklahoma","South Carolina",
+                 "Georgia") ~ "South",
+    State %in% c("Washington","Nevada","New Mexico","California",
+                 "Montana","Utah","Colorado","Wyoming",
+                 "Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
   ))
 cancer2$Region <-  factor(cancer2$Region)
 ```
 
-Power transformation UDF
 ```{r,Eeval=FALSE}
+#Power transformation UDF
 boxcox <- function(x, p){ 
   if (p == 0){
     return(log(x)) 

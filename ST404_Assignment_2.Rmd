@@ -55,6 +55,20 @@ Cook's distance, using all predictor variables, shows us that Williamsburg city 
 cancer <- cancer %>% filter(incidenceRate!=1014.2)  
 ```
 
+## Modelling Flow
+Now that we have established the missing values and corrected these lets first look at the scatter plots of the data and fit a model based on observations of these. We looked at the correlation in our initial EDA and so we will use this to fit a model. The variables we select will have higher correlation with deathRate. The variables we will select are: Edu18_24, PctMarriedHouseholds, PctBlack, PctPublicCoverage, Pct PrivateCoverage, PctUnemployed16_Over, PercentMarried, PovertyPercent, medIncome and incidenceRate.
+
+We will now assess the adequacy of the model. We want to know if the functional form of the model is correct. We will look at the following plots to assess this:
+``` {r adequacy}, echo = FALSE}
+plot(lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer)
+```
+
+We can see from the plots that the variance in errors is not constant and we also notice from our intitial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. 
+
+We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations:
+
+
+
 ## Transformations
 
 Due to the large quantity of variables, it is important to keep the model simple so that it is easy to interpret and maintains explanatory power.

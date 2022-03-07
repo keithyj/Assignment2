@@ -463,10 +463,11 @@ We then attempted to extend this model using quadratic terms and interaction ter
 
 
 ```{r, eval = FALSE}
+
 cancer3 <- cancerRaw
 cancer3 <- cancer3[-c(1489,2713,1941,1490),]
 
-cancer3 = separate(cancer,"Geography",c("County","State"),sep = ", ")
+cancer3 = separate(cancer3,"Geography",c("County","State"),sep = ", ")
 cancer3 <- cancer3 %>%
   mutate(Region = case_when(
     State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
@@ -484,11 +485,11 @@ cancerLASSO$PctBlack <- log(cancerLASSO$PctBlack + 0.1 )
 cancerLASSO <- model.matrix(~., data = cancerLASSO)
 
 LASSO <- glmnet(cancerLASSO, cancer3$deathRate, alpha = 1) 
-cvLASSO <- cv.glmnet(cancerLASSO, cancer$deathRate, alpha = 1)
-LASSOmodel <- glmnet(cancerLASSO, cancer$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
+cvLASSO <- cv.glmnet(cancerLASSO, cancer3$deathRate, alpha = 1)
+LASSOmodel <- glmnet(cancerLASSO, cancer3$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
 
 LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
-LASSOresiduals <- cancer$deathRate - LASSOpredicted
+LASSOresiduals <- cancer3$deathRate - LASSOpredicted
 
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer$deathRate - mean(cancer$deathRate))^2))
 

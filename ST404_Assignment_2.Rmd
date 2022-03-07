@@ -7,7 +7,13 @@ linestretch: 1.5
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+	fig.align = "center",
+	fig.width = 7,
+	message = FALSE,
+	include = TRUE,
+	warnings = FALSE
+)
 ```
 ```{r, include = FALSE}
 #Loading the data

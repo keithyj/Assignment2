@@ -165,63 +165,188 @@ Initially we attempted stepwise regression for the data set without any tranform
 
 First we apply the transformations and create a separate transformed dataset, then we define the bounds of the complexity of our model. Then we do the same as above and perform stepwise regression on this dataset using both AIC and BIC.
 
-```{r}
+```{r Apply transformations, include=FALSE}
+cancer2=cancer
+cancer2$incidenceRate=incidenceRate^(3/2)
+cancer2$medIncome=log(medIncome)
+cancer2$PctBlack = log(PctBlack+1)
+cancer2 = separate(cancer2,"Geography",c("County","State"),sep = ", ")
+cancer2 <- cancer2 %>%
+  mutate(Region = case_when(
+    State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
+    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
+    State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
+    State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
+  ))
+cancer2$Region <-  factor(cancer2$Region)
+```
+
+We first attempted to use AIC but this returned a model with 11 variables in it as well as an intercept term. Despite the fact this model is a good explanation of the data, it is far from simple and would be difficult to interpret properly. As a result we opted to go forward using BIC as this gave a heavier penalty for having more variables.
+
+```{r,include=FALSE}
 fullTransModel=lm(deathRate~incidenceRate+medIncome+povertyPercent+MedianAgeMale+
-               MedianAgeFemale+AvgHouseholdSize+PercentMarried+
-               PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
-               PctPublicCoverage+PctBlack+PctMarriedHouseholds+Edu18_24+Region,data=cancer2)
+                    MedianAgeFemale+AvgHouseholdSize+PercentMarried+
+                    PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
+                    PctPublicCoverage+PctBlack+PctMarriedHouseholds+Edu18_24+Region,data=cancer2)
 nullTransModel=lm(deathRate~1,data=cancer2)
-```
-
-```{r}
-aicTransModel=step(nullTransModel,direction='both',scope=formula(fullTransModel),trace=0,k=2)
-summary(aicTransModel)
-```
-
-This model contains 11 regressor variables (including the region factor variable which has 4 levels) which is a lot of variables and would make it hard to interpret the model. Predictive power will be good but the complexity needs to be penalised more, so we will use the BIC instead.
-
-```{r}
 bicTransModel=step(nullTransModel,direction='both',scope=formula(fullTransModel),trace=0,k=log(3047))
 summary(bicTransModel)
+ols_coll_diag(bicTransModel)
+extractAIC(bicTransModel,k=log(3047))
 ```
 
-This produces a model with 8 variables (again including the region factor variable) which is a lot more manageable and easy to interpret, it has a standard residual error that is only 0.0005 greater than the model that uses AIC. So it fits the data nearly as well, but there are far fewer variables. This model can even be further simplified because when the full output of the stepwise regression function is printed, the change in the value of the BIC is very little in the last steps compared to the first steps. We can simplify our model further by removing `PctBlack`, `PctPrivateCoverage`, and `PctPublicCoverage`. This reduces our R-squared value by 0.015 and our adjusted R-squared value by 0.0147 but it also removes three variables which makes the model simpler. By only including one coverage variable, we also see reduced VIF values. With all coverage variables VIF values of over 6 were present. PctEmpPrivCoverage was chosen since it has the lowest p-value in the above model and also shows slightly smaller signs of collinearity with the non-coverage regressor variables. All p-values for this model are below 0.0002, which is very low.
+From this first model the most notable issues were still a lot of variables, 9 in total, which still is not very simple. Additionally the condition number was very high, 369, showing key issues between `medIncome` and the intercept term. `medIncome` was a variable we believed to be important for the model but, regardless of the approach we took to solve the issue, it always needed to be removed. Even though it was deemed to be important, there are other variables in the data which would represent similar ideas, for example `povertyPercent`. As a result we changed our maximal model to not include it and so going forward, `medIncome` was not used. We repeated our stepwise regression without `medIncome`. Once this is done, the diagnostic were are analysed, the Residuals vs Leverage plot is shown.
 
-(??) Perhaps the part about removing the coverage variables could be moved to the multicollinearity section but not sure as the summary tables take up quite a lot of pages (??).
+```{r,include=FALSE}
+fullTransModel=lm(deathRate~incidenceRate+povertyPercent+MedianAgeMale+
+                    MedianAgeFemale+AvgHouseholdSize+PercentMarried+
+                    PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
+                    PctPublicCoverage+PctBlack+PctMarriedHouseholds+Edu18_24+Region,data=cancer2)
+nullTransModel=lm(deathRate~1,data=cancer2)
 
-```{r}
-altBICTransModel=lm(deathRate~incidenceRate + medIncome + Region +
-PctUnemployed16_Over + Edu18_24 + PctEmpPrivCoverage, data=cancer2)
-summary(altBICTransModel)
+bicTransModel=step(nullTransModel,direction='both',scope=formula(fullTransModel),k=log(3047))
 ```
 
-**Multicollinearity**
+```{r,include=FALSE}
+summary(bicTransModel)
+plot(bicTransModel, which=4)
+```
 
-```{r}
-summary(altBICTransModel)
-ols_coll_diag(altBICTransModel)
-extractAIC(altBICTransModel,k=log(3047))
-#Swap medIncome with povertyPercent
-altBICTransModel=lm(deathRate~incidenceRate + povertyPercent + Region +
-PctUnemployed16_Over + Edu18_24 + PctEmpPrivCoverage, data=cancer2)
-summary(altBICTransModel)
-ols_coll_diag(altBICTransModel)
-extractAIC(altBICTransModel,k=log(3047))
-#Remove intercept term
-altBICTransModel=lm(deathRate~ 0 + incidenceRate + povertyPercent + Region +
-PctUnemployed16_Over + Edu18_24 + PctEmpPrivCoverage, data=cancer2)
-summary(altBICTransModel)
-ols_coll_diag(altBICTransModel)
-extractAIC(altBICTransModel,k=log(3047))
+The diagnostic plots for this model showed a high influence point which may have needed to be removed, this was the point for Williamsburg City, Virginia. A point that had an unusually high incidence rate was Union County, Florida. A third of the population in this county live in prisons$^{[1]}$ which is not representative of the rest of the USA, as a result we also chose to remove this point. We then continued with stepwise regression. 
+
+```{r,include=FALSE}
+cancer2=cancer2[-which(cancer2$incidenceRate>30000),]
+fullTransModel=lm(deathRate~incidenceRate+povertyPercent+MedianAgeMale+
+                    MedianAgeFemale+AvgHouseholdSize+PercentMarried+
+                    PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
+                    PctPublicCoverage+PctBlack+PctMarriedHouseholds+Edu18_24+Region,data=cancer2)
+nullTransModel=lm(deathRate~1,data=cancer2)
+bicModelNoOut=step(nullTransModel,direction='both',scope=formula(fullTransModel),k=log(3045))
+ols_coll_diag(bicModelNoOut)
+extractAIC(bicModelNoOut,k=log(3045))
+#BIC = 18263.02
+#Condition number = 98.7
+
+#Remove intercept and PercentMarriedHouseholds
+bicModelNoOut2=lm(deathRate~0+incidenceRate+povertyPercent+
+                    PctUnemployed16_Over+PctPrivateCoverage+PctEmpPrivCoverage+
+                    PctPublicCoverage+PctBlack+Edu18_24+
+                    Region,data=cancer2)
+summary(bicModelNoOut2)
+ols_coll_diag(bicModelNoOut2)
+extractAIC(bicModelNoOut2,k=log(3045))
+#BIC = 18268.4
+#Condition number = 71.3
+
+#Remove PctPrivateCoverage
+bicModelNoOut3=lm(deathRate~0+incidenceRate+povertyPercent+
+                    PctUnemployed16_Over+PctEmpPrivCoverage+
+                    PctPublicCoverage+PctBlack+Edu18_24+
+                    Region,data=cancer2)
+summary(bicModelNoOut3)
+ols_coll_diag(bicModelNoOut3)
+extractAIC(bicModelNoOut3,k=log(3045))
+#BIC = 18298.2
+#Condition number = 59.8
+
 #Remove Edu18_24
-altBICTransModel=lm(deathRate~ 0 + incidenceRate + povertyPercent + Region +
-PctUnemployed16_Over + PctEmpPrivCoverage, data=cancer2)
-summary(altBICTransModel)
-ols_coll_diag(altBICTransModel)
-extractAIC(altBICTransModel,k=log(3047))
+bicModelNoOut4=lm(deathRate~0+incidenceRate+povertyPercent+
+                    PctUnemployed16_Over+PctEmpPrivCoverage+
+                    PctPublicCoverage+PctBlack+
+                    Region,data=cancer2)
+summary(bicModelNoOut4)
+ols_coll_diag(bicModelNoOut4)
+extractAIC(bicModelNoOut4,k=log(3045))
+#BIC = 18355.2
+#Condition number = 46.8
+
+#Remove PctEmpPrivCoverage
+bicModelNoOut5=lm(deathRate~0+incidenceRate+povertyPercent+
+                    PctUnemployed16_Over+PctPublicCoverage+PctBlack+
+                    Region,data=cancer2)
+summary(bicModelNoOut5)
+ols_coll_diag(bicModelNoOut5)
+extractAIC(bicModelNoOut5,k=log(3045))
+#BIC = 18360.26
+#Condition number = 23.1
+plot(bicModelNoOut5)
 ```
 
-There are issues here in the condition numbers and the variables that contribute to them. medIncome and incidenceRate variables appear to be the issue. These are not correlated yet they seem to explain the same variance in the deathRate but both are very important in prediction. As a result it is likely best that both remain in the model due to the fact removing one would have a massive impact on the prediction power of our model. 
+The initial model included the following variables: `incidenceRate`, `PctPrivateCoverage`, `Region`, `PctPublicCoverage`, `PctEmpPrivCoverage`, `PctUnemployed16_Over`, `Edu18_24`, `povertyPercent`, `PctBlack` and `PctMarriedHousehlds`. There were significant issues with collinearity here and the number of variables should be reduced to help with the simplicity of the model so that it can be interpreted. A change log of how we got to our final version of this model is below. The aim was to find a balance such that the condition numbers were low enough and the BIC was not affected too much.
+
+```{r Change log,echo=FALSE}
+changes=matrix(0,nrow=5,ncol=4)
+BICs=c(18263.02,18268.4,18298.2,18355.2,18360.26)
+CondNos=c(98.7,71.3,59.8,46.8,23.1)
+Excluded=c('NA','Intercept','PctPrivateCoverage','Edu18_24','PctEmpPrivCoverage')
+changes[,1]=1:5
+changes[,2]=Excluded
+changes[,3]=BICs
+changes[,4]=CondNos
+changes=as.table(changes)
+colnames(changes)=c('Model no.','Removed variable','BIC','Condition Number')
+knitr::kable(changes, caption = "Change log for the model")
+```
+
+This gives a final model which is shown in the table below in detail.
+
+```{r Model Table,echo=FALSE}
+name=c('incidenceRate','povertyPercent','PctUnemployed16_Over',
+       'PctPublicCoverage','PctBlack','Region(Midwest)','Region(Northeast)',
+       'Region(South)','Region(West)')
+transformation=c('incidenceRate^(3/2)','None','None','None','log(PctBlack+0.1)',
+                'None','None','None','None')
+pVals=c('<2e-16','<2e-16','3.1e-11','<2e-16','9.1e-6','<2e-16','<2e-16','<2e-16',
+        '<2e-16')
+beta=c('0.00698','0.803','1.02','0.592','-1.90','71.5','61.0','78.7','56.7')
+modelTable=as.table(matrix(data=c(transformation,pVals,beta),nrow=9,ncol=3))
+rownames(modelTable)=name
+colnames(modelTable)=c('Transformation','p-value','Parameter estimate')
+knitr::kable(modelTable, caption = "Information on the final model")
+```
+
+**Interpretation**
+
+For incidence rate the value of the parameter estimate is 0.00696. Since the variable is raised to the power of 1.5, this means that if the incidence rate quadruples, then the death rate will increase by 8 times. For example, if the incidence rate changes from 100 to 400 cases per 100000 people, then the death rate will increase from 6.96 to 55.68, if all other variables are equal to 0. The other transformed variable is `PctBlack`, for this variable a parameter estimate of -1.03 means that if the percentage of black population increases then the death rate will decrease. The exact amount of the death rate decrease is dependent on what your percentage increases from and to but the marginal decrease in death rate also decreases as the percentage of black population increases. For example an observed increase in black population from 1% to 2% will result in a larger decrease in death rate than 50% to 51%.
+
+For `povertyPercent` the parameter estimate is 0.768, this means that for every extra percent of the population of the county living in poverty, the cancer death rate increases by 0.768. For `PctUnemployed16_Over`, the parameter estimate is 0.983, this means that if the percentage of the unemployed population in a county increases by 1% then the cancer death rate increases by 0.983. Finally the regional parameters all correspond to an increase in death rate. If we take the west as the reference parameter then, in comparison, if the county is in the Midwest then the death rate will be 14.0 per 100000 people higher than the west. If it is in the South then the death rate will be 19.3 per 100000 people higher and if it is in the north east then the death rate will be 2.7 per 100000 people higher.
+
+All of the variables also have low p-values, they are all significant at the 0.5% significance level which means all of their inclusions in the model are justified. Finally, the F-statistic for the model has a value of 26740 on 9 and 3036 degrees of freedom. This is a high value for the F-statistic and it has an extremely low p-value, less than 2.2e-16, this confirms that the model is a much better fit for the data than a model with just an intercept.
+
+**Cross validation**
+
+To determine how well the model predicts values we use leave one out cross validation (LOOCV). This is included in the package `caret`. First LOOCV was used on the model that the BIC stepwise regression function suggested and then it was used on the altered model where multicollinearity issues were fixed. These results were compared to see how well the final model predicts values in comparison to the model stepwise regression suggests. A summary of the output is given below.
+
+```{r Cross validation, include=FALSE,eval=FALSE}
+library(caret)
+ctrl <- trainControl(method = "LOOCV")
+model <- train(deathRate~0+incidenceRate+povertyPercent+
+                 PctUnemployed16_Over+PctPublicCoverage+PctBlack+
+                 Region,data=cancer2,
+               method = "lm", trControl = ctrl)
+print(model)
+#RMSE = 20.21833
+#MAE = 15.18691
+#RSquared = 0.461552
+
+BICmodel <- train(deathRate~0+incidenceRate+PctPrivateCoverage+Region+
+                    PctPublicCoverage+PctEmpPrivCoverage+PctUnemployed16_Over+
+                    Edu18_24+povertyPercent+PctBlack+PctMarriedHouseholds,
+                  data=cancer2, method = "lm", trControl = ctrl)
+print(BICmodel)
+#RMSE = 19.83217
+#MAE = 14.75242
+#RSquared = 0.4819337
+```
+
+```{r Cross Validation results, echo=FALSE}
+crossVal=as.table(t(matrix(data=c(19.83,14.75,0.4819,20.22,15.19,0.4616),nrow=2,ncol=3,byrow = TRUE)))
+colnames(crossVal)=c('BIC stepwise model','Final model')
+rownames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
+knitr::kable(crossVal, caption = "Errors and goodness of fit measures for first BIC stepwise regression model against final model")
+```
+
+As can be seen from the table, the first model is better than the final model in terms of goodness of fit as well as the errors, this is not by a large margin however. The root mean squared error of the final model is only 0.39 higher (1.9%) than the first model. The mean absolute error is only 0.43 higher (2.9%), so the difference is not that large. With respect to the R-Squared values, the difference between them is 0.02, which is also low. As a result, the alterations to the model for simplification and to eliminate collinearity have not adversely affected the model by a large margin. The prediction capabilities of the model are good and the model fits the data well.
 
 
 ## Ridge Regression

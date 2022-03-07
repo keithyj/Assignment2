@@ -456,30 +456,41 @@ It will be better to use another penalized likelihood method such as LASSO. Howe
 
 ## LASSO
 
-Summary: 
-Running a LASSO on the transformed data and using the min.lambda from cross validation gives less variables to include (in general it's standard to use the value of lambda which is 1se away). The variables were incidecne rate, median income, percent unemplyed and percent private cvoverage. I like this as well since these cover pretty much all the varibels we might intuitvely expect without using more than one variables measuring eseentially the same thing (ie: percent private and percent publc coverage).
-Then extendning this we see an inclusion of a quadratic term for incidence rates. Interaction terms seemed to get messy so I decided not to include any. For this model I used the 1se lambda value. 
-This final model appears to have some issues with normality of residuals and maybe slight violations of homoscedascity. I need to explore this further.
+The first thing we do is run a LASSO on our data (including region and with transformations on percent black and incidence rate). From this we use cross validation to find an optimal value of lambda. From our cross validation we see that using the value of lambda minimising mean squared error will include almost all our variables. Therefore we opt to use the value of lambda 1se away from this minal value. The model generated with this value of lambda includes the followign variables: incidence rate, median income, poverty percentage, percent unemployed, percent private coverage, percent public coverage, education score and region. 
+This model has a R squared value of 0.4678.
+We then attempted to extend this model using quadratic terms and interaction terms between highly correlated variables. However the interaction terms were not being included and the quadratic terms whcih were included would shrink their linear counterparts to zero. Hence we leave 
 
 
-PLEASE IGNORE THIS 
-I found a mistake in my stuff, I'm working on it atm
 ```{r, eval = FALSE}
-require(glmnet) 
-#In this code I'm using cancer 2 as defined above with the changes that incidence rate is power transformed with a p value of 1.5. I'm going to change these above #but if I haven't when someone is readign this then bear it in mind. ALso included is the region, county and state variables Connor added.
+cancer3 <- cancerRaw
+cancer3 <- cancer3[-c(1489,2713,1941,1490),]
 
-IncidenceSqrd <- cancer2[,3]^2
-cancerLASSO <- cancer2[,c(3,4,12,13)]
-cancerLASSO <- cbind(cancerLASSO, IncidenceSqrd)
+cancer3 = separate(cancer,"Geography",c("County","State"),sep = ", ")
+cancer3 <- cancer3 %>%
+  mutate(Region = case_when(
+    State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
+    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
+    State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
+    State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
+  ))
+cancer3$Region <-  factor(cancer3$Region)
 
-LASSOfit <- glmnet(cancerLASSO, cancer2$deathRate, alpha = 1) #can be used for a plot 
-cvLASSO <- cv.glmnet(cancerLASSO, cancer2$deathRate, alpha = 1)
+cancerLASSO <- cancer3[,-c(1,2,5,11,19)]
 
-LASSOcandidate <- glmnet(cancerLASSO, cancer2$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
+cancerLASSO$incidenceRate <- boxcox(cancerLASSO$incidenceRate, p = 1.5)
+cancerLASSO$PctBlack <- log(cancerLASSO$PctBlack + 0.1 )
 
-LASSOpredicted <- predict(LASSOcandidate, newx = cancerLASSO)
-LASSOresiduals <- cancer2$deathRate - LASSOpredicted
-#Note here that Union County is making plots look bad
+cancerLASSO <- model.matrix(~., data = cancerLASSO)
+
+LASSO <- glmnet(cancerLASSO, cancer3$deathRate, alpha = 1) 
+cvLASSO <- cv.glmnet(cancerLASSO, cancer$deathRate, alpha = 1)
+LASSOmodel <- glmnet(cancerLASSO, cancer$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
+
+LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
+LASSOresiduals <- cancer$deathRate - LASSOpredicted
+
+LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer$deathRate - mean(cancer$deathRate))^2))
+
 ```
 
 ## Comparison of models found from Stepwise and LASSO variable selection

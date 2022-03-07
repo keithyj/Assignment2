@@ -169,7 +169,7 @@ First we apply the transformations and create a separate transformed dataset, th
 cancer2=cancer
 cancer2$incidenceRate=incidenceRate^(3/2)
 cancer2$medIncome=log(medIncome)
-cancer2$PctBlack = log(PctBlack+1)
+cancer2$PctBlack = log(PctBlack+0.1)
 cancer2 = separate(cancer2,"Geography",c("County","State"),sep = ", ")
 cancer2 <- cancer2 %>%
   mutate(Region = case_when(

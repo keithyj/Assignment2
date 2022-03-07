@@ -457,8 +457,9 @@ It will be better to use another penalized likelihood method such as LASSO. Howe
 ## LASSO
 
 The first thing we do is run a LASSO on our data (including region and with transformations on percent black and incidence rate). From this we use cross validation to find an optimal value of lambda. From our cross validation we see that using the value of lambda minimising mean squared error will include almost all our variables. Therefore we opt to use the value of lambda 1se away from this minal value. The model generated with this value of lambda includes the followign variables: incidence rate, median income, poverty percentage, percent unemployed, percent private coverage, percent public coverage, education score and region. 
-This model has a R squared value of 0.4678.
-We then attempted to extend this model using quadratic terms and interaction terms between highly correlated variables. However the interaction terms were not being included and the quadratic terms whcih were included would shrink their linear counterparts to zero. Hence we leave 
+This model has an R squared value of 0.4678. In addition, both linearity and homoscedascity are satisfied alothough there is a slight violaiton in normality of residuals. All coefficents of variables have the same sign as their correlation with death rate.
+We then attempted to extend this model using quadratic terms and interaction terms between highly correlated variables. However the interaction terms were not being included and the quadratic terms whcih were included would shrink their linear counterparts to zero. Hence we leave these extensions out.
+
 
 
 ```{r, eval = FALSE}

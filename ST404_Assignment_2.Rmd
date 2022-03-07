@@ -538,7 +538,7 @@ cancer2 <- cancer2 %>%
 cancer2$Region <-  factor(cancer2$Region)
 ```
 
-```{r,Eeval=FALSE}
+```{r, eval=FALSE}
 #Power transformation UDF
 boxcox <- function(x, p){ 
   if (p == 0){
@@ -549,7 +549,6 @@ boxcox <- function(x, p){
   } 
 }
 ```
-
 
 
 

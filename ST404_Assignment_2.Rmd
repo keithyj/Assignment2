@@ -56,7 +56,7 @@ We can see from the plots that the variance in errors is not constant and we als
 We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations:
 
 * log(PctBlack$+0.1$)
-* IncidenceRate^$\frac{3}{2}$^
+* log(incidenceRate)
 * log(medianIncome)
 * log(deathRate)
 

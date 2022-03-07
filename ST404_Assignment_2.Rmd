@@ -487,7 +487,7 @@ LASSOresiduals <- cancer2$deathRate - LASSOpredicted
 
 ## Limitations and recommendations for improvements in future work
 
-
+One limitation of this data is that the populations in each county are different. However, our model puts equal weighting on each county. To gain a more realistic model, perhaps it would be valuable to give different weightings to counties depending on their population.
 
 
 

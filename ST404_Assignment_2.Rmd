@@ -132,14 +132,14 @@ Let's check to see if there is any redundancy in the model. We can do this by ch
 ``` {r redundancy}
 # Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
 par(mfrow = c(2,3))
-with(cancer2, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
-with(cancer2, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
-with(cancer2, scatter.smooth(deathRate~PctBlack, ylab = "deathRate", xlab = "PctBlack", lpars = list(col = "red", lwd = 2), main = "deathRate against PctBlack", cex.main = 1))
-with(cancer2, scatter.smooth(deathRate~PctPrivateCoverage, ylab = "deathRate", xlab = "PctPrivateCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPrivateCoverage", cex.main = 1))
-with(cancer2, scatter.smooth(deathRate~PctPublicCoverage, ylab = "deathRate", xlab = "PctPublicCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPublicCoverage", cex.main = 1))
-with(cancer2, scatter.smooth(deathRate~povertyPercent, ylab = "deathRate", xlab = "povertyPercent", lpars = list(col = "red", lwd = 2), main = "deathRate against povertyPercent", cex.main = 1))
-with(cancer2, scatter.smooth(deathRate~medIncome, ylab = "deathRate", xlab = "medIncome", lpars = list(col = "red", lwd = 2), main = "deathRate against medIncome", cex.main = 1))
-with(cancer2, scatter.smooth(deathRate~incidenceRate, ylab = "deathRate", xlab = "incidenceRate", lpars = list(col = "red", lwd = 2), main = "deathRate against incidenceRate", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctBlack, ylab = "deathRate", xlab = "PctBlack", lpars = list(col = "red", lwd = 2), main = "deathRate against PctBlack", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctPrivateCoverage, ylab = "deathRate", xlab = "PctPrivateCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPrivateCoverage", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctPublicCoverage, ylab = "deathRate", xlab = "PctPublicCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPublicCoverage", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~povertyPercent, ylab = "deathRate", xlab = "povertyPercent", lpars = list(col = "red", lwd = 2), main = "deathRate against povertyPercent", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~medIncome, ylab = "deathRate", xlab = "medIncome", lpars = list(col = "red", lwd = 2), main = "deathRate against medIncome", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~incidenceRate, ylab = "deathRate", xlab = "incidenceRate", lpars = list(col = "red", lwd = 2), main = "deathRate against incidenceRate", cex.main = 1))
 ```
 The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and medIncome, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity.
 

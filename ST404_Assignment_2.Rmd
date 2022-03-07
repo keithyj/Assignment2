@@ -41,31 +41,114 @@ cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSi
 cancer <- subset(cancer, select=-c(PctEmployed16_Over))
 ```
 
-### Outliers
-Several predictor variables may have outliers that can be considered for removal if they have a high leverage, specifically, incidenceRate. We will look at Cook's distance to declare if any of these outliers have significant influence.
-
-``` {r CheckOutliers, echo = FALSE}
-par(mfrow=c(1,2))
-# Plot the cook's distance
-plot(lm(deathRate ~ incidenceRate, data=cancer), 4)
-plot(lm(deathRate ~ ., data=cancer[-c(1,4)]), 4)
-```
-Cook's distance, using all predictor variables, shows us that Williamsburg city in Virginia has an incidence rate with high influence and so gives us sufficient evidence to remove the outlier in incidenceRate.
-``` {r removeWilliamsburg, include = FALSE}
-cancer <- cancer %>% filter(incidenceRate!=1014.2)  
-```
 
 ## Modelling Flow
 Now that we have established the missing values and corrected these lets first look at the scatter plots of the data and fit a model based on observations of these. We looked at the correlation in our initial EDA and so we will use this to fit a model. The variables we select will have higher correlation with deathRate. The variables we will select are: Edu18_24, PctMarriedHouseholds, PctBlack, PctPublicCoverage, Pct PrivateCoverage, PctUnemployed16_Over, PercentMarried, PovertyPercent, medIncome and incidenceRate.
 
 We will now assess the adequacy of the model. We want to know if the functional form of the model is correct. We will look at the following plots to assess this:
 ``` {r adequacy}, echo = FALSE}
-plot(lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer)
+Model1 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer)
+plot(Model1)
 ```
 
 We can see from the plots that the variance in errors is not constant and we also notice from our intitial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. 
 
 We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations:
+
+* log(PctBlack$+0.1$)
+* IncidenceRate^$\frac{3}{2}$^
+* log(medianIncome)
+* log(deathRate)
+
+cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5) #using boxcox from practical class 2, user defined funciton in appendix
+``` {r transformed variables, echo = FALSE}
+cancer5=cancer
+
+cancer5$incidenceRate=log(cancer5$incidenceRate)
+cancer5$medIncome=log(cancer5$medIncome)
+cancer5$PctBlack=log(cancer5$PctBlack+0.1)
+cancer5$deathRate=log(cancer5$deathRate)
+
+#Check for any updated heteroscedascity and linearity
+plot(lm(deathRate ~ incidenceRate, data = cancer5))
+plot(lm(deathRate ~ medIncome, data = cancer5))
+plot(lm(deathRate ~ PctBlack, data = cancer5))
+
+# Notice heteroscedacity has decreased for incidence rate, homoscedasticity exists for pctBlack and medIncome.
+# Linearity for PctBlack, linearity for medIncome, incidenceRate is linear until a certain point
+```
+These transformations show evidence of homoscedascity and linearity thus we will update the new model.
+
+``` {r adequacy2}, echo = FALSE}
+Model2 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer5)
+plot(Model2)
+```
+We can see that the new model is linear and heteroscedascity has been reduced but it still exists. We will go on to calculate if any outliers exist and if they have high leverage.
+
+Several predictor variables may have outliers that can be considered for removal if they have a high leverage, specifically, incidenceRate. We will look at Cook's distance to declare if any of these outliers have significant influence.
+
+``` {r CheckOutliers, echo = FALSE}
+library(car)
+library(olsrr)
+library(glmnet)
+
+outlierTest(Model2)
+# Shows some outliers exist, namely points 1093, 2713, 1941, 1220, 2645, 1058
+par(mfrow=c(1,2))
+ols_plot_resid_lev(Model2)
+# This plot shows that the observations that are outliers with high leverage that we declare highly influencial are 2713, 1941 and 1059.
+par(mfrow=c(1,2))
+ols_plot_dfbetas(Model2)
+```
+Observations 1093, 2713, 1941, 1220, 2645 and 1058 are shown to be extreme outliers and so testing influence we see that 2713, 1941 and 1058 all have high leverage and furthermore DFBETAS greater than 0.3 in the model. We will declare this to be highly influencial and so remove these observations from our Model.
+
+``` {r removeoutliers}
+library(dplyr)
+cancer5 <-  slice(cancer5, -c(2713, 1941, 1058))
+```
+
+Now we will refit the model. 
+
+``` {r Model3}
+Model3 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer5)
+plot(Model3)
+```
+
+``` {r checklargesample, include = FALSE}
+summary(cancer5)
+#Shows 3044 observations 
+```
+We have 3044 observations in our sample space, so this is large. What does this mean?
+
+We will now check to see if deathRate highly correlates to any of the explanatory variables by using analysis of variance.
+``` {r anova}
+Anova(Model3)
+summary(Model3)
+```
+From the F statistic with a p-value <0.05 we can determine that our response variable has a relationship with at least one of the variables in the model and we can further test which model is the optimal model.
+
+Let's check to see if there is any redundancy in the model. We can do this by checking for multicollinearity within the explanatory variables. 
+
+``` {r redundancy}
+# Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
+par(mfrow = c(2,3))
+with(cancer2, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
+with(cancer2, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
+with(cancer2, scatter.smooth(deathRate~PctBlack, ylab = "deathRate", xlab = "PctBlack", lpars = list(col = "red", lwd = 2), main = "deathRate against PctBlack", cex.main = 1))
+with(cancer2, scatter.smooth(deathRate~PctPrivateCoverage, ylab = "deathRate", xlab = "PctPrivateCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPrivateCoverage", cex.main = 1))
+with(cancer2, scatter.smooth(deathRate~PctPublicCoverage, ylab = "deathRate", xlab = "PctPublicCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPublicCoverage", cex.main = 1))
+with(cancer2, scatter.smooth(deathRate~povertyPercent, ylab = "deathRate", xlab = "povertyPercent", lpars = list(col = "red", lwd = 2), main = "deathRate against povertyPercent", cex.main = 1))
+with(cancer2, scatter.smooth(deathRate~medIncome, ylab = "deathRate", xlab = "medIncome", lpars = list(col = "red", lwd = 2), main = "deathRate against medIncome", cex.main = 1))
+with(cancer2, scatter.smooth(deathRate~incidenceRate, ylab = "deathRate", xlab = "incidenceRate", lpars = list(col = "red", lwd = 2), main = "deathRate against incidenceRate", cex.main = 1))
+```
+The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and medIncome, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity.
+
+``` {r multicollinearity}
+library(olsrr)
+ols_coll_diag(Model3)
+#Look for low tolerance, VIF > 5 and condition index > 30
+```
+This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the one variance decomposition proportion above 0.3 which is said to be the cut off is povertyPercent when the condition index is 547.2. We can also look at the correlation matrix to check which variables povertyPercent is highly correlated with, as seen in assignment one. This shows high correlation with all the variables with high VIF. So, we will perform variable selection to conclude a final model due to redundancy in the model.
 
 
 

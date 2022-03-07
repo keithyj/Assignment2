@@ -46,7 +46,7 @@ cancer <- subset(cancer, select=-c(PctEmployed16_Over))
 Now that we have established the missing values and corrected these lets first look at the scatter plots of the data and fit a model based on observations of these. We looked at the correlation in our initial EDA and so we will use this to fit a model. The variables we select will have higher correlation with deathRate. The variables we will select are: Edu18_24, PctMarriedHouseholds, PctBlack, PctPublicCoverage, Pct PrivateCoverage, PctUnemployed16_Over, PercentMarried, PovertyPercent, medIncome and incidenceRate.
 
 We will now assess the adequacy of the model. We want to know if the functional form of the model is correct. We will look at the following plots to assess this:
-``` {r adequacy}, echo = FALSE}
+``` {r adequacy, echo = FALSE}
 Model1 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer)
 plot(Model1)
 ```
@@ -79,7 +79,7 @@ plot(lm(deathRate ~ PctBlack, data = cancer5))
 ```
 These transformations show evidence of homoscedascity and linearity thus we will update the new model.
 
-``` {r adequacy2}, echo = FALSE}
+``` {r adequacy2, echo = FALSE}
 Model2 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer5)
 plot(Model2)
 ```

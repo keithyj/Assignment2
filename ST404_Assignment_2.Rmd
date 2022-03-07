@@ -25,6 +25,9 @@ cancerRaw <- cancer
 library(tidyr)
 library(dplyr)
 library(olsrr)
+library(car)
+library(glmnet)
+library(caret)
 ```
 # Findings
 
@@ -39,11 +42,12 @@ As declared in the EDA, missing values exist in PctEmployed16_Over and extremely
 * Scale the values between 0 and 0.1 in AvgHouseholdSize by 100.
 * Remove the PctEmployed16_Over column containing missing values.
 
-``` {r ScaleColumn, echo = FALSE}
+``` {r ScaleColumn, include = FALSE}
 # Multiply values less than 0.1 by 100 and replace column
 cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1]*100
 ```
-``` {r RemoveMissingValuesColumn, echo = FALSE}
+
+``` {r RemoveMissingValuesColumn, include = FALSE}
 cancer <- subset(cancer, select=-c(PctEmployed16_Over))
 ```
 
@@ -52,8 +56,9 @@ cancer <- subset(cancer, select=-c(PctEmployed16_Over))
 Now that we have established the missing values and corrected these lets first look at the scatter plots of the data and fit a model based on observations of these. We looked at the correlation in our initial EDA and so we will use this to fit a model. The variables we select will have higher correlation with deathRate. The variables we will select are: Edu18_24, PctMarriedHouseholds, PctBlack, PctPublicCoverage, Pct PrivateCoverage, PctUnemployed16_Over, PercentMarried, PovertyPercent, medIncome and incidenceRate.
 
 We will now assess the adequacy of the model. We want to know if the functional form of the model is correct. We will look at the following plots to assess this:
-``` {r adequacy, echo = FALSE}
+``` {r adequacy, echo = FALSE, eval = TRUE}
 Model1 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer)
+par(mfrow=c(1,2))
 plot(Model1)
 ```
 
@@ -67,37 +72,41 @@ We first transform the individual predictor variables to satisfy homoscedascity,
 * log(deathRate)
 
 cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5) #using boxcox from practical class 2, user defined funciton in appendix
-``` {r transformed variables, echo = FALSE}
+``` {r transformed variables, include = FALSE}
 cancer5=cancer
 
 cancer5$incidenceRate=log(cancer5$incidenceRate)
 cancer5$medIncome=log(cancer5$medIncome)
 cancer5$PctBlack=log(cancer5$PctBlack+0.1)
 cancer5$deathRate=log(cancer5$deathRate)
-
+```
+``` {r checkingassumptions, echo = FALSE, eval = TRUE}
 #Check for any updated heteroscedascity and linearity
-plot(lm(deathRate ~ incidenceRate, data = cancer5))
-plot(lm(deathRate ~ medIncome, data = cancer5))
-plot(lm(deathRate ~ PctBlack, data = cancer5))
+par(mfrow=c(1,2))
+plot(lm(deathRate ~ incidenceRate, data = cancer5), 1)
+plot(lm(deathRate ~ incidenceRate, data = cancer5), 3)
+plot(lm(deathRate ~ medIncome, data = cancer5), 1)
+plot(lm(deathRate ~ medIncome, data = cancer5), 3)
+plot(lm(deathRate ~ PctBlack, data = cancer5), 1)
+plot(lm(deathRate ~ PctBlack, data = cancer5), 3)
+
 
 # Notice heteroscedacity has decreased for incidence rate, homoscedasticity exists for pctBlack and medIncome.
 # Linearity for PctBlack, linearity for medIncome, incidenceRate is linear until a certain point
 ```
+
 These transformations show evidence of homoscedascity and linearity thus we will update the new model.
 
-``` {r adequacy2, echo = FALSE}
+``` {r adequacy2, echo = FALSE, eval = TRUE}
 Model2 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer5)
+par(mfrow=c(1,2))
 plot(Model2)
 ```
 We can see that the new model is linear and heteroscedascity has been reduced but it still exists. We will go on to calculate if any outliers exist and if they have high leverage.
 
 Several predictor variables may have outliers that can be considered for removal if they have a high leverage, specifically, incidenceRate. We will look at Cook's distance to declare if any of these outliers have significant influence.
 
-``` {r CheckOutliers, echo = FALSE}
-library(car)
-library(olsrr)
-library(glmnet)
-
+``` {r CheckOutliers, echo = FALSE, eval = TRUE}
 outlierTest(Model2)
 # Shows some outliers exist, namely points 1093, 2713, 1941, 1220, 2645, 1058
 par(mfrow=c(1,2))
@@ -108,15 +117,16 @@ ols_plot_dfbetas(Model2)
 ```
 Observations 1093, 2713, 1941, 1220, 2645 and 1058 are shown to be extreme outliers and so testing influence we see that 2713, 1941 and 1058 all have high leverage and furthermore DFBETAS greater than 0.3 in the model. We will declare this to be highly influencial and so remove these observations from our Model.
 
-``` {r removeoutliers}
+``` {r removeoutliers, include = FALSE}
 library(dplyr)
 cancer5 <-  slice(cancer5, -c(2713, 1941, 1058))
 ```
 
 Now we will refit the model. 
 
-``` {r Model3}
+``` {r Model3, echo = FALSE, eval = TRUE}
 Model3 <- lm(deathRate ~ Edu18_24 + PctMarriedHouseholds + PctBlack + PctPublicCoverage + PctPrivateCoverage + PctUnemployed16_Over + PercentMarried + povertyPercent + medIncome + incidenceRate, data = cancer5)
+par(mfrow=c(1,2))
 plot(Model3)
 ```
 
@@ -127,7 +137,7 @@ summary(cancer5)
 We have 3044 observations in our sample space, so this is large. What does this mean?
 
 We will now check to see if deathRate highly correlates to any of the explanatory variables by using analysis of variance.
-``` {r anova}
+``` {r anova, include = FALSE}
 Anova(Model3)
 summary(Model3)
 ```
@@ -135,7 +145,7 @@ From the F statistic with a p-value <0.05 we can determine that our response var
 
 Let's check to see if there is any redundancy in the model. We can do this by checking for multicollinearity within the explanatory variables. 
 
-``` {r redundancy}
+``` {r redundancy, echo = FALSE, eval = TRUE}
 # Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
 par(mfrow = c(2,3))
 with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
@@ -149,7 +159,7 @@ with(cancer5, scatter.smooth(deathRate~incidenceRate, ylab = "deathRate", xlab =
 ```
 The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and medIncome, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity.
 
-``` {r multicollinearity}
+``` {r multicollinearity, echo = FALSE, eval = TRUE}
 library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
@@ -192,7 +202,7 @@ boxcox <- function(x, p){
 }
 ```
 
-``` {r transformations, echo = FALSE}
+``` {r transformations, include = FALSE}
 cancer2=cancer
 cancer2$deathRate=log(cancer2$deathRate)
 cancer2$incidenceRate=boxcox(cancer2$incidenceRate, p = 1.5) #using boxcox from practical class 2, user defined funciton in appendix
@@ -204,7 +214,7 @@ cancer2$PctPrivateCoverage=cancer2$PctPrivateCoverage^2
 cancer2$PctBlack=log(cancer2$PctBlack+0.1)
 ```
 
-``` {r residualplots, echo = FALSE}
+``` {r residualplots, include = FALSE}
 par(mfrow=c(1,4))
 plot(lm(deathRate ~ incidenceRate, data=cancer2), 1)
 plot(lm(deathRate ~ medIncome, data=cancer2), 1)
@@ -217,7 +227,7 @@ plot(lm(deathRate ~ PctBlack, data=cancer2), 1)
 
 We also add a variable describing the region in which the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions. This division was chosen as it is the most common division for the purposes of data analysis since it groups states into groups with similar geographical features and cultures among other factors. These regions are Northeast, Midwest, South and West.
 
-``` {r region variable, echo=FALSE}
+``` {r region variable, include=FALSE}
 cancer2 = separate(cancer2,"Geography",c("County","State"),sep = ", ")
 cancer2 <- cancer2 %>%
   mutate(Region = case_when(
@@ -238,7 +248,7 @@ Before attempting to fit any models or try stepwise regression, we looked at wha
 
 We also looked at combinations of variables that could be problematic if they are in the same model. This was based heavily on the correlation between variables, which is visualised by the matrix below: 
 
-```{r, echo=FALSE,message=FALSE}
+```{r, echo=FALSE, eval = TRUE}
 require(corrplot)
 correlations1 <- cor(cancer[,c(2,3,5:17)],method='spearman')
 corrplot(correlations1,method='square',title='Spearman Correlation plot', tl.col="black", tl.cex=0.6,mar=c(1,1,1,1))
@@ -363,7 +373,7 @@ plot(bicModelNoOut5)
 
 The initial model included the following variables: `incidenceRate`, `PctPrivateCoverage`, `Region`, `PctPublicCoverage`, `PctEmpPrivCoverage`, `PctUnemployed16_Over`, `Edu18_24`, `povertyPercent`, `PctBlack` and `PctMarriedHousehlds`. There were significant issues with collinearity here and the number of variables should be reduced to help with the simplicity of the model so that it can be interpreted. A change log of how we got to our final version of this model is below. The aim was to find a balance such that the condition numbers were low enough and the BIC was not affected too much.
 
-```{r Change log,echo=FALSE}
+```{r Change log, echo=FALSE}
 changes=matrix(0,nrow=5,ncol=4)
 BICs=c(18263.02,18268.4,18298.2,18355.2,18360.26)
 CondNos=c(98.7,71.3,59.8,46.8,23.1)
@@ -379,7 +389,7 @@ knitr::kable(changes, caption = "Change log for the model")
 
 This gives a final model which is shown in the table below in detail.
 
-```{r Model Table,echo=FALSE}
+```{r Model Table, echo=FALSE}
 name=c('incidenceRate','povertyPercent','PctUnemployed16_Over',
        'PctPublicCoverage','PctBlack','Region(Midwest)','Region(Northeast)',
        'Region(South)','Region(West)')
@@ -406,7 +416,7 @@ All of the variables also have low p-values, they are all significant at the 0.5
 
 To determine how well the model predicts values we use leave one out cross validation (LOOCV). This is included in the package `caret`. First LOOCV was used on the model that the BIC stepwise regression function suggested and then it was used on the altered model where multicollinearity issues were fixed. These results were compared to see how well the final model predicts values in comparison to the model stepwise regression suggests. A summary of the output is given below.
 
-```{r Cross validation, include=FALSE,eval=FALSE}
+```{r Cross validation, include=FALSE}
 library(caret)
 ctrl <- trainControl(method = "LOOCV")
 model <- train(deathRate~0+incidenceRate+povertyPercent+
@@ -454,7 +464,7 @@ This final model appears to have some issues with normality of residuals and may
 
 PLEASE IGNORE THIS 
 I found a mistake in my stuff, I'm working on it atm
-```{r, eval = FALSE}
+```{r, include = FALSE}
 require(glmnet) 
 #In this code I'm using cancer 2 as defined above with the changes that incidence rate is power transformed with a p value of 1.5. I'm going to change these above #but if I haven't when someone is readign this then bear it in mind. ALso included is the region, county and state variables Connor added.
 

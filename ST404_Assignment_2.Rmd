@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 	options(scipen = 999)
 )
 ```
+
 ```{r, include = FALSE}
 #Loading the data
 load('cancer.rdata')
@@ -63,6 +64,7 @@ cancer <- cancer %>%
     State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
   ))
 cancer$Region <-  factor(cancer$Region)
+
 ```
 
 ## Modelling Flow
@@ -90,7 +92,7 @@ with(cancer, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", 
 
 The variables we will not include in the initial model will be those that show no relationship with deathRate as they will not be significant. From the scatter plots we are unable to see whether this is the case, so instead we will fit an initial model of the data set and check significance.
 
-``` {r adequacy, echo = FALSE, eval = TRUE}
+``` {r adequacy, include = FALSE}
 Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
 
 summary(Model0)
@@ -100,7 +102,7 @@ We test the null hypothesis that there is no linear association between deathRat
 We will do this by assessing the adequacy of the model. We want to know if the functional form of the model is correct. We will look at the following plots to assess this:
 
 
-``` {r}
+``` {r, echo = FALSE, eval = FALSE}
 par(mfrow=c(2,2))
 plot(Model0)
 ```
@@ -126,7 +128,7 @@ boxcox <- function(x, p){
 }
 ```
 
-``` {r transformed variables, include = FALSE}
+``` {r transformations, include = FALSE}
 cancer5=cancer
 
 cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
@@ -135,9 +137,10 @@ cancer5$PctUnemployed16_Over=boxcox(cancer5$PctUnemployed16_Over, p = 0.5)
 cancer5$PctBlack=log(cancer5$PctBlack+0.1)
 
 ```
+
 ``` {r checkingassumptions, echo = FALSE, eval = TRUE}
 #Check for any updated heteroscedascity and linearity
-par(mfrow=c(1,2))
+par(mfrow=c(2,2))
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 1)
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 3)
 plot(lm(deathRate ~ medIncome, data = cancer5), 1)
@@ -169,7 +172,7 @@ outlierTest(Model1)
 par(mfrow=c(1,2))
 ols_plot_resid_lev(Model1)
 # This plot shows that the observations that are outliers with high leverage that we declare highly influencial are 2713, 1941 and 1059.
-par(mfrow=c(1,2))
+par(mfrow=c(2,2))
 ols_plot_dfbetas(Model1)
 ```
 Observations 2714, 2682, 166, 1059, 1942, 1094 and 282 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.3 we will declare this to be highly influencial and so remove these observations from our model.
@@ -199,7 +202,7 @@ Observing this model, we can see the F statistic is high with a p-value <0.05. S
 
 Let's check to see if there is any redundancy in the model. We will spot this by comparing the summary statistics output above with the scatter plots we saw in our EDA. 
 
-``` {r multicolliearity2, eval = FALSE, echo = FALSE}
+``` {r multicolliearity2, include = FALSE}
 # Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
 par(mfrow = c(2,3))
 with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
@@ -220,7 +223,7 @@ with(cancer5, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate",
 ```
 The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and PctEmpPrivCoverage, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent and PctBlack in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity. The other redundancy we see is that MedianAgeMale and MedianAgeFemale plot against deathRate does not correlate with the estimate in the summary statistic. These redundancies could be caused by multicollinearity.
 
-``` {r multicollinearity, echo = FALSE, eval = TRUE}
+``` {r multicollinearity, include = FALSE}
 library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
@@ -263,6 +266,7 @@ Initially we attempted stepwise regression for the data set without any transfor
 **With transformations**
 
 First we apply the transformations and create a separate transformed dataset, then we define the bounds of the complexity of our model. Then we do the same as above and perform stepwise regression on this dataset using both AIC and BIC.
+
 
 
 **AIC**
@@ -503,7 +507,6 @@ boxcox <- function(x, p){
   } 
 }
 ```
-
 
 
 

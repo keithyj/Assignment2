@@ -12,12 +12,13 @@ knitr::opts_chunk$set(
 	fig.width = 7,
 	message = FALSE,
 	include = TRUE,
-	warnings = FALSE
+	warnings = FALSE,
+	options(scipen = 999)
 )
 ```
 ```{r, include = FALSE}
 #Loading the data
-load('cancer.rdata')
+load('~/Downloads/cancer.rdata')
 attach(cancer)
 #Storing raw data
 cancerRaw <- cancer
@@ -50,7 +51,6 @@ cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSi
 ``` {r RemoveMissingValuesColumn, include = FALSE}
 cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 ```
-We also add a variable describing the region in which the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions (reference needed) . This division was chosen as it is the most common division for the purposes of data analysis since it groups states into groups with similar geographical features and cultures among other factors. These regions are Northeast, Midwest, South and West.
 
 ``` {r region variable, include=FALSE}
 cancer = separate(cancer,"Geography",c("County","State"),sep = ", ")
@@ -187,7 +187,7 @@ From the F statistic with a p-value <0.05 we can determine that our response var
 
 Let's check to see if there is any redundancy in the model. We can do this by checking for multicollinearity within the explanatory variables. 
 
-``` {r redundancy, echo = FALSE, eval = TRUE}
+``` {r multicolliearity2, echo = FALSE}
 # Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
 par(mfrow = c(2,3))
 with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
@@ -198,15 +198,27 @@ with(cancer5, scatter.smooth(deathRate~PctPublicCoverage, ylab = "deathRate", xl
 with(cancer5, scatter.smooth(deathRate~povertyPercent, ylab = "deathRate", xlab = "povertyPercent", lpars = list(col = "red", lwd = 2), main = "deathRate against povertyPercent", cex.main = 1))
 with(cancer5, scatter.smooth(deathRate~medIncome, ylab = "deathRate", xlab = "medIncome", lpars = list(col = "red", lwd = 2), main = "deathRate against medIncome", cex.main = 1))
 with(cancer5, scatter.smooth(deathRate~incidenceRate, ylab = "deathRate", xlab = "incidenceRate", lpars = list(col = "red", lwd = 2), main = "deathRate against incidenceRate", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~Region, ylab = "deathRate", xlab = "Region", lpars = list(col = "red", lwd = 2), main = "deathRate against Region", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~MedianAgeMale, ylab = "deathRate", xlab = "MedianAgeMale", lpars = list(col = "red", lwd = 2), main = "deathRate against MedianAgeMale", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~MedianAgeFemale, ylab = "deathRate", xlab = "MedianAgeFemale", lpars = list(col = "red", lwd = 2), main = "deathRate against MedianAgeFemale", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~AvgHouseholdSize, ylab = "deathRate", xlab = "AvgHouseholdSize", lpars = list(col = "red", lwd = 2), main = "deathRate against AvgHouseholdSize", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab = "PercentMarried", lpars = list(col = "red", lwd = 2), main = "deathRate against PercentMarried", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
-The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and medIncome, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity.
+The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and PctEmpPrivCoverage, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent and PctBlack in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity. The other redundancy we see is that MedianAgeMale and MedianAgeFemale plot against deathRate does not correlate with the estimate in the summary statistic. Again, this could be because of the direct collinearity.
 
 ``` {r multicollinearity, echo = FALSE, eval = TRUE}
 library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
+
+
+str(summary(Model3))
 ```
-This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the one variance decomposition proportion above 0.3 which is said to be the cut off is povertyPercent when the condition index is 547.2. We can also look at the correlation matrix to check which variables povertyPercent is highly correlated with, as seen in assignment one. This shows high correlation with all the variables with high VIF. So, we will perform variable selection to conclude a final model due to redundancy in the model.
+This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which is said to be the cut off, is PctEmpPrivCoverage when condition index is 45.36. When the condition index is 48, PctPublicCoverage is an issue. When the condition index is 78 PctPrivateCoverage and Edu19_24 are issues. When the condition index is 123, issues lie with MedianAgeMale and Female. When condition index is 159, issues lie with AvgHouseholdSize, PctMarried and PctMarriedHouseholds. When condition index is 262, the issues are with when condition index is 262.44: incidenceRate is an issue. povertyPercent, intercept and medIncome when the condition index is 547.2. 
+
+We can also look at the correlation matrix to check which variables povertyPercent is highly correlated with, as seen in assignment one. This shows high correlation with all the variables with high VIF. So, we will perform variable selection to conclude a final model due to redundancy in the model.
 
 
 

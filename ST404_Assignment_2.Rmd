@@ -185,11 +185,11 @@ ols_plot_dfbetas(Model1)
 # This plot shows that the observations 2682, 282, 166, 2727, and 2714 all have a DFBETA > 0.4.
 ```
 
-Observations 2682, 282, 166, 2727, and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model.
+Observations 2682, 282, 166, 2727, and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model. We will also decide to remove the observation "Union County, Florida" due to the nature of this outlier influencing the data.
 
 ``` {r removeoutliers, include = FALSE}
 library(dplyr)
-cancer5 <-  slice(cancer5, -c(2682, 282, 166, 2727, 2714))
+cancer5 <-  slice(cancer5, -c(2682, 282, 166, 2727, 2714, 1490))
 ```
 The new model is seen as below.
 ``` {r Model3, echo = FALSE, eval = TRUE}

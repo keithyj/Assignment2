@@ -399,6 +399,8 @@ Note: might want to say ran an LAR algorithim here, I think that might be what i
 
 Running a LASSO on our data with transformation as outlined above. By using cross validation we get the value of lambda minimising the mean squared error as (fill). However as illustrated in figure ? we can see that this value of lambda includes all coeficents in our model. This would make our model difficult to interpret so we instead consider the value of lambda which is 1se away (fill). Using this more strict restriction term shrinks the following variables to zero: (fill). 
 
+By using LASSO variable selection we construct a model with eight predictor variables which allign with those we expected from our intial EDA. The variables we have are
+
 ### Put the coefficents plot here with abline used for the values of lambda also include a legend ###
 
 

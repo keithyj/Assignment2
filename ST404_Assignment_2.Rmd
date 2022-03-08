@@ -371,12 +371,6 @@ colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared'
 knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
 ```
 
-## Ridge Regression
-Performing a Ridge regression will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 
-It should be used in a scenario when the # of parameters is large or when multicollinearity/collinearity exists between variables.
-It will increase the bias that exists in the model, which in turn can reduce mean square error by improving variance. Despite this bias the Ridge Regression estimates will have a lower mean square error than least squared estimator.
-It will be better to use another penalized likelihood method such as LASSO. However, could be potential to use it after fitting some models to improve predictive power.
-
 ## LASSO
 
 Note: might want to say ran an LAR algorithim here, I think that might be what it is called.
@@ -432,7 +426,33 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer$deathRate - mean(cancer
 
 ```
 
-## Comparison of models found from Stepwise and LASSO variable selection
+## Ridge Regression
+Due to multicollinearity existing in the model we will perform a ridge regression, this will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 
+
+``` {r ridge, echo = FALSE, eval = FALSE}
+set.seed(3041)
+ridge.fit <- cv.glmnet(model.matrix(Model3), cancer5$deathRate, alpha = 0, nrow = 3041)
+
+optimallamda.ridge <- ridge$lambda.min
+predicteddeathRate.ridge <- predict(ridge.fit, s = optimallamda, newx = model.matrix(Model3))
+
+predicted.ridge <- cv.glmnet(model.matrix(Model3), cancer5$deathRate, type.measure = 'mse', keep = TRUE, alpha = 0, nrow = 3041)
+lamda.ridge <- predicted.ridge$lambda.min
+mse2.ridge <- predicted.ridge$cvm[predicted.ridge$lambda == lamda.ridge]
+mse2.ridge
+
+rsquared1.ridge <- sum((cancer5$deathRate - mean(cancer5$deathRate))^2)
+rsquared2.ridge <- sum((predicteddeathRate.ridge - cancer5$deathRate)^2)
+
+rsquared.ridge <- (1 - (rsquared2/rsquared1))
+rsquared.ridge
+```
+
+The Ridge regression produces a linear model with an R^2 value of 0.484, and a mean square error of 378.5, which will be a reduced value as the ridge regression has improved variance at the cost of increased bias in the model. The model still contains all predictor variables and so would be good to improve the predictive power of the model, but considering all variables are still included, an R^2 value of 4.84 is not great, and it will be better to use another penalized likelihood method such as LASSO.
+
+## Comparison of models found from variable selection
+
+
 
 
 ## Limitations and recommendations for improvements in future work

@@ -152,10 +152,6 @@ plot(lm(deathRate ~ PctBlack, data = cancer5), 1)
 plot(lm(deathRate ~ PctBlack, data = cancer5), 3)
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1)
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3)
-
-
-# Notice heteroscedacity has decreased for incidence rate, homoscedasticity exists for pctBlack and medIncome.
-# Linearity for PctBlack, linearity for medIncome, incidenceRate is linear until a certain point
 ```
 
 These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables.
@@ -171,9 +167,10 @@ plot(Model1, 3)
 ```
 The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This could be due to influencial outliers.
 
-#### Outliers
+#### Outliers  
 
-Outliers are not a cause for concern: however, if they have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will go on to calculate if any outliers exist and if they have high leverage, then deduce if these are influencial by using residual leverage plots and DFBETAS.
+
+Outliers are not always a cause for concern: however, if they have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will go on to calculate if any outliers exist and if they have high leverage, then deduce if these are influencial by using residual leverage plots and DFBETAS.
 
 
 ``` {r CheckOutliers, echo = FALSE}
@@ -185,14 +182,15 @@ ols_plot_dfbetas(Model1)
 # This plot shows that the observations 2682, 282, 166, 2727, and 2714 all have a DFBETA > 0.4.
 ```
 
-Observations 2682, 282, 166, 2727, and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model. We will also decide to remove the observation "Union County, Florida" due to the nature of this outlier influencing the data.
+Observations 2682, 282, 166, 2727, and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model. We will also decide to remove the observation "Union County, Florida" due to the nature of this outlier influencing the data **Need reference**.
 
 ``` {r removeoutliers, include = FALSE}
+#remove the influencial outliers.
 library(dplyr)
 cancer5 <-  slice(cancer5, -c(2682, 282, 166, 2727, 2714, 1490))
 ```
-The new model is seen as below.
-``` {r Model3, echo = FALSE, eval = TRUE}
+
+``` {r Model3, include = FALSE}
 Model3 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer5)
 par(mfrow=c(2,2))
 plot(Model3)
@@ -202,15 +200,13 @@ plot(Model3)
 summary(cancer5)
 #Shows 3041 observations 
 ```
-We have 3041 observations in our sample space, so this is large. This means that we can pay less attention to the Q-Q plot as the errors being normally distributed is not a major concern.
+We have 3041 observations in our sample space, this is large and so we can pay less attention to the errors being normally distributed as it is not a major concern. The new model shows linearity and improved homoscedascitity and so we check if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics and checking the p values for significance. The F statistic is high with a p-value <0.05. So, we can determine that our response variable has a relationship with at least one of the variables in the model and we can further test which model is the optimal model by testing for redundancy. We will spot this by comparing the summary statistics output with the scatter plots we saw in our EDA. 
 
-We will now check to see if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics.
+The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and PctEmpPrivCoverage, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent and PctBlack in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity. The other redundancy we see is that MedianAgeMale and MedianAgeFemale plot against deathRate does not correlate with the estimate in the summary statistic. These redundancies could be caused by multicollinearity.
+
 ``` {r summarymod3, include = FALSE}
 summary(Model3)
 ```
-Observing this model, we can see the F statistic is high with a p-value <0.05. So, we can determine that our response variable has a relationship with at least one of the variables in the model and we can further test which model is the optimal model.
-
-Let's check to see if there is any redundancy in the model. We will spot this by comparing the summary statistics output above with the scatter plots we saw in our EDA. 
 
 ``` {r multicolliearity2, include = FALSE}
 # Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
@@ -231,8 +227,8 @@ with(cancer5, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab 
 with(cancer5, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
 with(cancer5, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
-The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and PctEmpPrivCoverage, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent and PctBlack in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity. The other redundancy we see is that MedianAgeMale and MedianAgeFemale plot against deathRate does not correlate with the estimate in the summary statistic. These redundancies could be caused by multicollinearity.
 
+#### Multicollinearity
 ``` {r multicollinearity, include = FALSE}
 library(olsrr)
 ols_coll_diag(Model3)
@@ -240,7 +236,7 @@ ols_coll_diag(Model3)
 ```
 This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which is said to be the cut off **Reference Needed** , is PctEmpPrivCoverage when condition index is 45.36. When the condition index is 48, PctPublicCoverage is an issue. When the condition index is 78 PctPrivateCoverage and Edu19_24 are issues. When the condition index is 123, issues lie with MedianAgeMale and Female. When condition index is 159, issues lie with AvgHouseholdSize, PctMarried and PctMarriedHouseholds. When condition index is 262, the issues are with when condition index is 262.44: incidenceRate is an issue. povertyPercent, intercept and medIncome when the condition index is 547.2. 
 
-We can see that the variables that are, to some degree, multicollinear are: povertyPercent and medIncome, AvgHouseholdSize, PercentMarried and PctMarriedHouseholds, MedianAgeMale and MedianAgeFemale, and PctPrivateCoverage and Edu19_24.
+We can see that the variables that show, to some degree, multicollinearity are: povertyPercent and medIncome, AvgHouseholdSize, PercentMarried and PctMarriedHouseholds, MedianAgeMale and MedianAgeFemale, and PctPrivateCoverage and Edu19_24.
 
 ```{r, include=FALSE}
 #defining boxcox function
@@ -253,7 +249,6 @@ boxcox <- function(x, p){
   } 
 }
 ```
-## Modelling and Variable Selection
 
 ### Stepwise Regression
 

@@ -385,9 +385,21 @@ It will be better to use another penalized likelihood method such as LASSO. Howe
 
 ## LASSO
 
-The first thing we do is run a LASSO on our data (including region and with transformations on percent black and incidence rate). From this we use cross validation to find an optimal value of lambda. From our cross validation we see that using the value of lambda minimising mean squared error will include almost all our variables. Therefore we opt to use the value of lambda 1se away from this minal value. The model generated with this value of lambda includes the followign variables: incidence rate, median income, poverty percentage, percent unemployed, percent private coverage, percent public coverage, education score and region. 
-This model has an R squared value of 0.4678. In addition, both linearity and homoscedascity are satisfied alothough there is a slight violaiton in normality of residuals. All coefficents of variables have the same sign as their correlation with death rate.
-We then attempted to extend this model using quadratic terms and interaction terms between highly correlated variables. However the interaction terms were not being included and the quadratic terms whcih were included would shrink their linear counterparts to zero. Hence we leave these extensions out.
+Note: might want to say ran an LAR algorithim here, I think that might be what it is called.
+
+Running a LASSO on our data with transformation as outlined above. By using cross validation we get the value of lambda minimising the mean squared error as (fill). However as illustrated in figure ? we can see that this value of lambda includes all coeficents in our model. This would make our model difficult to interpret so we instead consider the value of lambda which is 1se away (fill). Using this more strict restriction term shrinks the following variables to zero: (fill). 
+
+### Put the coefficents plot here with abline used for the values of lambda also include a legend ###
+
+
+---Extending the LASSO---
+In attempting to extend our existing LASSO model we first included interaction terms for variables with high correlation. This included (fill). However by including these variables we ran into more issues with the variables being selected. Therefore we chose to omit the inclusion of interaction terms. With respect to higher order terms we found that the only quadratic terms being included would shrink their linear ocunterpart to zero. Therefore we also decided to omit higher order terms for independent variables from the model.
+
+---Evaluating the goodness of this model--- 
+The R squared value for this model was (fill).
+The adjusted R Squared value was (fill)
+The variance inflation factor for the variables included did not exceed 2, suggesting no issuees with multicolinearity. 
+Residuals are homoscedastic and uncorrelated. However the residuals did not demonstrate a normal distribution. 
 
 
 

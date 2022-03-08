@@ -114,6 +114,17 @@ We first transform the individual predictor variables to satisfy homoscedascity,
 * sqrt(PctUnemployed16_Over)
 * log(medianIncome)
 
+```{r, include=FALSE}
+#Power transformation UDF
+boxcox <- function(x, p){ 
+  if (p == 0){
+    return(log(x)) 
+  }
+  else{
+    return((x^p - 1)/p)
+  } 
+}
+```
 
 ``` {r transformed variables, include = FALSE}
 cancer5=cancer
@@ -153,7 +164,7 @@ We can see that the new model is linear and heteroscedascity has been reduced, b
 Several predictor variables may have observations that can be considered for removal if they are outliers with a high influence. 
 
 ``` {r CheckOutliers, echo = FALSE, eval = TRUE}
-outlierTest(Model21)
+outlierTest(Model1)
 # Shows some outliers exist, namely points 1093, 2713, 1941, 1220, 2645, 1058
 par(mfrow=c(1,2))
 ols_plot_resid_lev(Model1)

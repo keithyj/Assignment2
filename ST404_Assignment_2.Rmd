@@ -52,7 +52,7 @@ cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSi
 #removing PctEmployed16_Over and binnedInc from the dataset used for modelling.
 cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 ```
-We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions **Reference Needed**. These regions are Northeast, Midwest, South and West.
+We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions (United States Census Bureau). These regions are Northeast, Midwest, South and West.
 
 ``` {r region variable, include=FALSE}
 #Split Geography into county and state
@@ -536,5 +536,7 @@ boxcox <- function(x, p){
 }
 ```
 
+#References
 
+United States Census Bureau. 2010. *United States Census Bureau*. [Online]. [Accessed 8th March 2022]. Available from: https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
 

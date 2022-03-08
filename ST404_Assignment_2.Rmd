@@ -12,8 +12,7 @@ knitr::opts_chunk$set(
 	fig.width = 7,
 	message = FALSE,
 	include = TRUE,
-	warnings = FALSE,
-	options(scipen = 999)
+	warnings = FALSE
 )
 ```
 
@@ -37,41 +36,42 @@ library(caret)
 
 Our findings are based off the preliminary EDA of the US Cancer Dataset.
 
-## Cleaning The Data
+## Tidying the Data
 ### Missing Values
-As declared in the EDA, missing values exist in PctEmployed16_Over and extremely low values exist in AvgHouseholdSize. We choose to remove the PctEmployed16_Over column in order to keep all 3047 counties within the dataset. 152 PctEmplyed16_Over values were missing which is a sizeable proportion in a dataset this size. Another option was to fill in the missing values by predicting them using a linear model created by the other variables. However, the variable PctUnemployed16_Over is very strongly negatively correlated with PctEmployed16_Over with a Pearson correlation coefficient of -0.65. Therefore, on balance, it is better to remove PctEmployed16_Over entirely to avoid multicollinearity with PctUnemployed16_Over, and to avoid increasing the variance of the model by performing further predictions of the missing values. We will clean the data in the following way:
-
-* Scale the values between 0 and 0.1 in AvgHouseholdSize by 100.
-* Remove the PctEmployed16_Over column containing missing values.
+As declared in the EDA, missing values exist in PctEmployed16_Over and extremely low values exist in AvgHouseholdSize. Many, 152, PctEmplyed16_Over observations are missing. We could fill in the missing values by predicting them using a linear model created by the other variables. However, the variable PctUnemployed16_Over is strongly negatively correlated with PctEmployed16_Over. Therefore, we choose to remove PctEmployed16_Over entirely to avoid collinearity with PctUnemployed16_Over, and to avoid increasing the variance of the model by performing further predictions of the missing values. We will also scale the values of AvgHouseholdSize between 0 and 0.1 by 100.
 
 ``` {r ScaleColumn, include = FALSE}
-# Multiply values less than 0.1 by 100 and replace column
+# Multiply values less than 0.1 by 100 and update column
 cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1]*100
 ```
 
 ``` {r RemoveMissingValuesColumn, include = FALSE}
+#removing PctEmployed16_Over and binnedInc from the dataset used for modelling.
 cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 ```
-We also add a variable describing the region in which the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions **Reference Needed**. This division was chosen as it is the most common division for the purposes of data analysis since it groups states into groups with similar geographical features and cultures among other factors. These regions are Northeast, Midwest, South and West.
+We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions **Reference Needed**. These regions are Northeast, Midwest, South and West.
 
 ``` {r region variable, include=FALSE}
+#Split Geography into county and state
 cancer = separate(cancer,"Geography",c("County","State"),sep = ", ")
 cancer <- cancer %>%
   mutate(Region = case_when(
+  #Declaring the region that the states are in
     State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
     State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
     State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
     State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
   ))
+  #Setting the Region variable as a factor
 cancer$Region <-  factor(cancer$Region)
-
 ```
+Lastly, we choose to ignore binnedInc in our modelling process as it represents the same force as medIncome.
 
 ## Modelling Flow
-Now that we have established the missing values and corrected these lets first look at the scatter plots of the data and fit a model based on observations of these. We looked at the correlation in our initial EDA and so we will use this to fit a model. 
+We observe the scatter plots of the individual variables against deathRate and fit an initial model based on these, as seen in previous EDA. 
 
 ``` {r redundancy, include = FALSE}
-# Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
+# Look at scatter plots and identify any relationships between deathRate.
 par(mfrow = c(2,3))
 with(cancer, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
 with(cancer, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
@@ -89,35 +89,37 @@ with(cancer, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab =
 with(cancer, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
 with(cancer, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
-
-The variables we will not include in the initial model will be those that show no relationship with deathRate as they will not be significant. From the scatter plots we are unable to see whether this is the case, so instead we will fit an initial model of the data set and check significance.
+The variables we will include in the initial model are those that show a relationship with deathRate. From the scatter plots it is not clear to see whether this is the case, so instead we will fit an initial model of the current data set and check the significance.
 
 ``` {r adequacy, include = FALSE}
+# Creating a linear model with all variables from the current dataset
 Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
 
+# Check the output of the model showing estimates and significance
 summary(Model0)
 ```
+
 We test the null hypothesis that there is no linear association between deathRate and povertyPercent, deathRate and medianAgeMale, and deathRate and PercentMarried. We check the p values for these which show 0.656,  0.936, 0.360, and 0.141, hence we fail to reject the null hypothesis. We will not remove any of these variables from the model at this moment in time as there could be underlying issues as to why they are not significant, such as multicollinearity. 
 
-We will do this by assessing the adequacy of the model. We want to know if the functional form of the model is correct. We will look at the following plots to assess this:
+We will assess the adequacy of the model by checking if the functional form of the model is correct. We will look at the following plots to assess this:
 
 
-``` {r, echo = FALSE, eval = FALSE}
-par(mfrow=c(2,2))
-plot(Model0)
+``` {r, echo = FALSE, eval = TRUE}
+# Identify any heteroscedascity and non-linearity
+par(mfrow=c(1,2))
+plot(Model0, 1)
+plot(Model0, 2)
 ```
 
-We can see from the plots that the variance in errors is not constant and non-linearity. We also notice from our intitial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. 
-
-We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations:
+We can see from the plots that there exists heteroscedascity and non-linearity. We also notice from our intitial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. We do this by using Box-Cox and observations after trialling log transformations. We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations:
 
 * log(PctBlack$+0.1$)
 * incidenceRate^1.5
 * sqrt(PctUnemployed16_Over)
-* log(medianIncome)
+* log(medIncome)
 
 ```{r, include=FALSE}
-#Power transformation UDF
+#Box cox Power transformation UDF
 boxcox <- function(x, p){ 
   if (p == 0){
     return(log(x)) 
@@ -129,8 +131,9 @@ boxcox <- function(x, p){
 ```
 
 ``` {r transformations, include = FALSE}
+# Declare new dataframe from old
 cancer5=cancer
-
+# Transformations
 cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
 cancer5$medIncome=log(cancer5$medIncome)
 cancer5$PctUnemployed16_Over=boxcox(cancer5$PctUnemployed16_Over, p = 0.5)
@@ -158,28 +161,35 @@ plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3)
 These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables.
 
 ``` {r adequacy2, echo = FALSE, eval = TRUE}
+# Creating updated model with transformed variables.
 Model1 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer5)
-par(mfrow=c(2,2))
-plot(Model1)
+
+# Identify any heteroscedascity and non-linearity 
+par(mfrow=c(1,2))
+plot(Model1, 1)
+plot(Model1, 3)
 ```
-We can see that the new model is linear and heteroscedascity has been reduced, but it still exists. We will go on to calculate if any outliers exist and if they have high leverage.
+The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This could be due to influencial outliers.
 
-Several predictor variables may have observations that can be considered for removal if they are outliers with a high influence. 
+#### Outliers
 
-``` {r CheckOutliers, echo = FALSE, eval = TRUE}
-outlierTest(Model1)
-# Shows some outliers exist, namely points 1093, 2713, 1941, 1220, 2645, 1058
+Outliers are not a cause for concern: however, if they have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will go on to calculate if any outliers exist and if they have high leverage, then deduce if these are influencial by using residual leverage plots and DFBETAS.
+
+
+``` {r CheckOutliers, echo = FALSE}
 par(mfrow=c(1,2))
 ols_plot_resid_lev(Model1)
-# This plot shows that the observations that are outliers with high leverage that we declare highly influencial are 2713, 1941 and 1059.
+# This plot shows that the observations that are outliers with high leverage that we declare highly influencial are 2682, 282, 166, 2727, and 2714.
 par(mfrow=c(2,2))
 ols_plot_dfbetas(Model1)
+# This plot shows that the observations 2682, 282, 166, 2727, and 2714 all have a DFBETA > 0.4.
 ```
-Observations 2714, 2682, 166, 1059, 1942, 1094 and 282 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.3 we will declare this to be highly influencial and so remove these observations from our model.
+
+Observations 2682, 282, 166, 2727, and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model.
 
 ``` {r removeoutliers, include = FALSE}
 library(dplyr)
-cancer5 <-  slice(cancer5, -c(2714, 2628, 166, 1059, 1942, 1094, 282))
+cancer5 <-  slice(cancer5, -c(2682, 282, 166, 2727, 2714))
 ```
 The new model is seen as below.
 ``` {r Model3, echo = FALSE, eval = TRUE}

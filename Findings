@@ -1,1 +1,69 @@
+---
+title: "ST404_Assignment_2_Findings"
+output: pdf_document
+fontsize: 11pt
+linestretch: 1.5
+---
+
+# Findings
+
+## Data cleaning and outliers
+
+With respect to previous explanatory data analysis, some cleaning of the data was required. With regards to the 152 missing values of the PctEmployed16_Over, we have decided to remove this column entirely in order to maintain a larger sample size from which to construct a model. It is also strongly negatively correlated to PctUnemployed16_Over and so having both variables would not add much value. We also mutliply the infeasibly small values (those less than 0.1) of AvgHouseholdSize by 100 in order to fix them.
+
+Several counties were identified as having very large leverage and are therefore likely to have a larger influence on variable coefficients in the model. It is not desirable to have such a small number of counties to have such a large impact on the model since we want the bulk of the counties to influence our future predictions and form our analysis of the causes of higher cancer death rates. Therefore, these counties have been removed. The counties are (....??).
+
+### Utilising the geography variable
+
+In order to account for different death rates found in different states within the US, we divided the US in to 4 regions and allocated each county in to one of these 4 regions. This variable could then be used to construct a model.
+
+## Transformations
+
+Some transformations of the predictor variables were required in order to fulfil the linear model assumptions. Transformations were kept to a minimum in order to keep the model as simple as possible. We performed the following transformations (...??)
+
+## Initial modelling
+
+Several variable selection methods were trialed in order to construct the best model in terms of simplicity, explanatory power and predictive power. These methods were Stepwise variable selection and LASSO regression.
+
+After utilising these techniques, models were often showing signs of multicollinearity. This violates one of our model assumptions and means that our variable coefficients are difficult to interpret, reducing explanatory power. Therefore, some adjustments to models were required after using the variable selection techniques.
+
+### Stepwise selection
+
+
+### LASSO regression
+
+
+
+## The final model
+
+Our final model can be summarised in the table below
+
+```{r,eval=FALSE,echo=FALSE}
+DF <- data.frame(row.names=c(),coefficient=c(),p-value=c())
+DF
+```
+
+
+### Analysis of the model
+
+Predictive power - 
+
+Explanatory power - 
+
+Simplicity - 
+
+Model plots - 
+
+```{r,eval=FALSE,echo=FALSE}
+par(mfrow=c(2,2))
+plot(model)
+```
+
+
+### Areas that do not conform to the general pattern
+
+We look for outliers within our model, as well as seeing if the counties we removed for having high leverage initially conform to our model and therefore to the general pattern. 
+
+### Limitations
+
 

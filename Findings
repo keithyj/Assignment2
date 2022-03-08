@@ -29,6 +29,36 @@ After utilising these techniques, models were often showing signs of multicollin
 
 ### Stepwise selection
 
+Stepwise regression is a variable selection technique which uses the following algorithm:  
+1. Start with initial model (usually full or null model).  
+2. Add or remove the variables that minimises the AIC or BIC.  
+3. Repeat (2) until no improvements can be made.  
+
+When we did this we found that, despite our initial data cleaning and transformations, there were issues with collinearity. As a result we looked at which variables we believed were most important and tried to remove issues with respect to collinearity with that in mind. Each time we removed one variable from the full model and ran the stepwise regression function again and reassessed whether there were any collinearity issues. Once these we eliminated we checked the residuals vs fitted plot to see if there was any issues with heteroscedastcity or any other model assumptions were broken.
+
+The model suggested by stepwise regression is shown below.
+
+```{r Model Table, echo=FALSE}
+name=c('incidenceRate','povertyPercent','PctUnemployed16_Over',
+       'PctPublicCoverage','PctBlack','PercentMarried')
+transformation=c('incidenceRate^(1.5)','None','PctUnemployed16_Over^(0.5)','None','log(PctBlack+0.1)',
+                'None')
+pVals=c('<2e-16','<2e-16','1.3e-8','1.1e-14','2.0e-12','<2e-16')
+beta=c('0.00768','1.53','4.71','0.556','2.02','0.858')
+modelTable=as.table(matrix(data=c(transformation,pVals,beta),nrow=6,ncol=3))
+rownames(modelTable)=name
+colnames(modelTable)=c('Transformation','p-value','Parameter estimate')
+knitr::kable(modelTable, caption = "Information on the final model")
+```
+
+**Interpretation**
+
+This model shows, for incidence rate, the value of the parameter estimate is 0.00740. Since the variable is raised to the power of 1.5, this means that if the incidence rate quadruples, then the death rate will increase by 8 times. For example, if the incidence rate changes from 100 to 400 cases per 100000 people, then the death rate will increase from 7.68 to 61.44, if all other variables are equal to 0. Another transformed variable is `PctBlack`, for this variable a parameter estimate of 2.02 means that if the percentage of black population increases then the death rate will increase. The exact amount of the death rate decrease is dependent on what your percentage increases from and to but the marginal increase in death rate decreases as the percentage of black population increases. For example an observed increase in black population from 1% to 2% will result in a larger increase in death rate than 50% to 51%. The last transformed variable is `PctUnemployed16_Over`, it has a coefficient of 4.71 and it is raised to the power of $\frac{1}{2}$. This means that if the unemployment rate quadruples  then the death rate will double. For example, if the unemployment rate goes from 5% to 20% then the death rate will go from 10.5 to 21.1, if all other variables are equal to 0.
+
+The other variables in the model are not transformed. The percentage of people with public coverage, the percentage of people in poverty and the percentage of people married have a coefficient of 0.556, 1.53 and 0.858 respectively. This means that for every percentage increase in the amount of people with public coverage, in poverty and that are married the death rate increases by 0.556, 1.53 and 0.858 respectively, assuming all other variables stay the same.
+
+All of the variables also have low p-values, they are all significant at the 0.1% significance level which means all of their inclusions in the model are justified. Finally, the F-statistic for the model has a value of 37040 on 6 and 3035 degrees of freedom. This is a high value for the F-statistic and it has an extremely low p-value, less than 2.2e-16, this confirms that the model is a much better fit for the data than a model with just an intercept.
+
 
 ### LASSO regression
 

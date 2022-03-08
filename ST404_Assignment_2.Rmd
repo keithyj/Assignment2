@@ -264,25 +264,6 @@ Initially we attempted stepwise regression for the data set without any transfor
 
 First we apply the transformations and create a separate transformed dataset, then we define the bounds of the complexity of our model. Then we do the same as above and perform stepwise regression on this dataset using both AIC and BIC.
 
-```{r Clean and Transform, include=FALSE}
-cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1]*100
-cancer <- subset(cancer, select=-c(PctEmployed16_Over,binnedInc))
-cancer5=cancer
-cancer5$incidenceRate=(cancer5$incidenceRate)^1.5
-cancer5$medIncome=log(cancer5$medIncome)
-cancer5$PctBlack=log(cancer5$PctBlack+0.1)
-cancer5$PctUnemployed16_Over=cancer5$PctUnemployed16_Over^(1/2)
-cancer5 <-  slice(cancer5, -c(2714, 2628, 166, 1059, 1942, 1094, 282))
-cancer5 = separate(cancer5,"Geography",c("County","State"),sep = ", ")
-cancer5 <- cancer5 %>%
-  mutate(Region = case_when(
-    State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
-    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
-    State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
-    State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
-  ))
-cancer5$Region <-  factor(cancer5$Region)
-```
 
 **AIC**
 

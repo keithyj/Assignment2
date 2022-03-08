@@ -200,9 +200,9 @@ plot(Model3)
 
 ``` {r checklargesample, include = FALSE}
 summary(cancer5)
-#Shows 3040 observations 
+#Shows 3041 observations 
 ```
-We have 3040 observations in our sample space, so this is large. This means that we can pay less attention to the Q-Q plot as the errors being normally distributed is not a major concern.
+We have 3041 observations in our sample space, so this is large. This means that we can pay less attention to the Q-Q plot as the errors being normally distributed is not a major concern.
 
 We will now check to see if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics.
 ``` {r summarymod3, include = FALSE}

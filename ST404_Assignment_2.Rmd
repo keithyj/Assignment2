@@ -573,7 +573,7 @@ One limitation of this data is that the populations in each county are different
 # Appendix
 \tiny
 ### Cleaning the Data
-```{r,eval=FALSE}
+```{r, eval=FALSE}
 #Correlation of employment variables
 cancerNoNAs <- na.omit(cancerRaw)
 cor(cancerNoNAs$PctUnemployed16_Over,cancerNoNAs$PctEmployed16_Over)
@@ -603,7 +603,7 @@ cancer$Region <-  factor(cancer$Region)
 ```
 
 ### Initial Model Analysis
-``` {r redundancy, include = FALSE}
+``` {r redundancyAppendix, include = FALSE}
 # Looking at scatter plots and identifying any relationships between deathRate and the predictor variables.
 par(mfrow = c(2,3))
 with(cancer, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
@@ -622,7 +622,7 @@ with(cancer, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab =
 with(cancer, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
 with(cancer, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
-``` {r adequacy, eval = FALSE}
+``` {r adequacyAppendix, eval = FALSE}
 # Creating a linear model with all variables from the current dataset
 Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
 #We updated this model after transformations and named it Model1 with the data = cancer5
@@ -671,7 +671,7 @@ plot(lm(deathRate ~ medIncome, data = cancer5), 3)
 ```
 
 ### Outliers/Influencial Obsevations
-``` {r CheckOutliers, eval = FALSE}
+``` {r CheckOutliersAppendix, eval = FALSE}
 par(mfrow=c(1,2))
 ols_plot_resid_lev(Model1)
 # This plot shows that the observations that are outliers with high leverage
@@ -687,7 +687,7 @@ summary(cancer5)
 ```
 
 ### Check Redundancy of the Linear Model
-``` {r summarymod3, eval = FALSE}
+``` {r summarymod3Appendix, eval = FALSE}
 # Use the summary of the current model and compare to scatter plots that show correlations to check for significance between predictors in the model with deathRate
 summary(Model3)
 
@@ -711,7 +711,7 @@ with(cancer5, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate",
 ```
 
 ### Multicollinearity
-``` {r multicollinearity, eval = FALSE}
+``` {r multicollinearityAppendix, eval = FALSE}
 library(olsrr)
 # Produce tables showing the VIF of variables in the current model, as well as tolerance, condition index and variance decomposition proportion.
 ols_coll_diag(Model3)
@@ -720,7 +720,7 @@ ols_coll_diag(Model3)
 
 
 ### Variable Selection: Stepwise Regression 
-```{r Define null and full models, echo=FALSE}
+```{r Define null and full modelsAppendix, echo=FALSE}
 # Create the model including all variables after removal of the variables showing no significance of a relationship with deathRate
 fullTransModel=lm(deathRate ~ Edu18_24 + medIncome + PctMarriedHouseholds + 
                     PctBlack + PctPublicCoverage + PctPrivateCoverage + 
@@ -732,14 +732,14 @@ nullTransModel=lm(deathRate~1,data=cancer5)
 ```
 
 #### AIC Stepwise
-```{r AIC Stepwise, eval=FALSE}
+```{r AIC StepwiseAppendix, eval=FALSE}
 AICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel))
 ols_coll_diag(AICmodel1)
 ```
 
 #### BIC Stepwise
 
-```{r BIC Stepwise 1, eval=FALSE}
+```{r BIC Stepwise 1Appendix, eval=FALSE}
 BICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
 ols_coll_diag(BICmodel1)
 summary(BICmodel1)
@@ -758,7 +758,7 @@ fullTransModel=lm(deathRate ~ 0 + Edu18_24 + medIncome + PctMarriedHouseholds +
 nullTransModel=lm(deathRate~0,data=cancer5)
 ```
 
-```{r Check Assumptions, eval=FALSE}
+```{r Check AssumptionsAppendix, eval=FALSE}
 # Checking the model assumptions of BICmodel4
 par(mar=c(1.5, 4.4, 2, 1.5))
 par(mfrow=c(2,2))
@@ -768,7 +768,7 @@ for (i in (1:4)) {
 ```
 
 #### Cross Validation of BIC Stepwise Model
-```{r Cross validation, eval=FALSE}
+```{r Cross validationAppendix, eval=FALSE}
 #Included in Statistical methodology
 crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))
 rownames(crossVal)=c('BIC stepwise model')
@@ -790,7 +790,7 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cance
 ```
 
 
-```{r Cross Validation LASSO, eval = FALSE} 
+```{r Cross Validation LASSOAppendix, eval = FALSE} 
 par(mfrow = c(1,1))
 plot(LASSO, "lambda", label = T)
 abline(v = log(cvLASSO$lambda.min), col = "blue")
@@ -809,7 +809,7 @@ plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO 
 
 ### Ridge Regression
 
-``` {r ridge, eval = FALSE}
+``` {r ridgeAppendix, eval = FALSE}
 set.seed(3041)
 ridge.fit <- cv.glmnet(model.matrix(Model3), cancer5$deathRate, alpha = 0, nrow = 3041)
 

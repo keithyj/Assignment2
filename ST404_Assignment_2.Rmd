@@ -132,7 +132,18 @@ LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
 LASSOresiduals <- cancer5$deathRate - LASSOpredicted
 
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
+```
 
+
+```{r Model Table, echo = FALSE}
+library(sylly)
+name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
+       'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
+beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
+modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
+rownames(modelTable)=name
+colnames(modelTable)=c('Parameter estimate')
+pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
 ```
 
 ### Ridge Regression
@@ -540,24 +551,14 @@ LASSOresiduals <- cancer3$deathRate - LASSOpredicted
 
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer3$deathRate - mean(cancer3$deathRate))^2))
 ```
-
-```{r Model Table, echo = FALSE}
-library(sylly)
-name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
-       'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
-beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
-rownames(modelTable)=name
-colnames(modelTable)=c('Parameter estimate')
-pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
-```
+alsdfkjkdfjklajdfkljaskdfjkadjfkjakdjfkajdkfadsjflkajdsfjksajksjkfjlsdfkljdkfjsdfkljsdkfksdjfklajsdfjajsdfjkldjfljdsajfksjkldjjasljlfjasdakjsdnfadsklfjdjsfkjaskfjd
 
 ```{r, echo = FALSE}
-par(mfrow = c(1,1))
+par(mfrow = c(2,1), mar = c(1.8,4.4,2,1.8))
 bin <- scale(LASSOresiduals)
 bin1 <- which(bin < 0)
 bin[bin1] <- -bin[bin1]
-plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals")
+plot(LASSOpredicted, sqrt(bin), main = "Scale Location For LASSO model", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals")
 plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals")
 ```
 

@@ -276,8 +276,8 @@ par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(2,2))
 plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5,main="log(PctBlack) Residuals Fitted",caption="")
 plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5,main="log(PctBlack) Scale location",caption="")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctUnemplyed16^0.5 Residuals Fitted",caption="")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemplyed16^0.5 Scale location",caption="")
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctUnemployed16^0.5 Residuals Fitted",caption="")
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemployed16^0.5 Scale location",caption="")
 ```
 
 These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This can be seen in the residual vs fitted and scale location plots of the full model with these transformations presented below. This could be due to influencial outliers.

@@ -524,7 +524,7 @@ The adjusted R Squared value was (fill)
 The variance inflation factor for the variables included did not exceed 2, suggesting no issuees with multicolinearity. 
 Residuals are homoscedastic and uncorrelated. However the residuals did not demonstrate a normal distribution. 
 
-```{r, eval = FALSE}
+```{r Model Table, eval = FALSE}
 cancerLASSO <- cancer5[,-c(1,2,17)]
 
 cancerLASSO <- model.matrix(~., data = cancerLASSO)
@@ -539,6 +539,17 @@ LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
 LASSOresiduals <- cancer3$deathRate - LASSOpredicted
 
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer3$deathRate - mean(cancer3$deathRate))^2))
+```
+
+```{r, echo = FALSE}
+library(sylly)
+name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
+       'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
+beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
+modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
+rownames(modelTable)=name
+colnames(modelTable)=c('Parameter estimate')
+pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
 ```
 
 ## Ridge Regression

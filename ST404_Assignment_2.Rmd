@@ -53,17 +53,12 @@ Furthermore we noticed that medIncome and binnedInc represent the same force and
 
 ## Transformations
 
-Some transformations of the variables were completed in order to fulfil the model assumptions, mainly homoscesastiscity (constant variance of errors) and linearity. Transformations were kept to a minimum in order to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are: 
-
-* incidenceRate^1.5
-* log(PctBlack)
-* sqrt(PctUnemployed16_Over)
-* log(medIncome)
+Some transformations of the variables were completed in order to fulfil the model assumptions, mainly homoscesastiscity (constant variance of errors) and linearity. Transformations were kept to a minimum in order to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are: power transform incidenceRate and PctUnemployed16_Over as follows incidenceRate^1.5 and sqrt(PctUnemployed16_Over), also log transform PctBlack and medIncome.
 
 ## Outliers and Influencial Observations
 
 Several observations were identified as having a high leverage and after testing for influencial observations we declared that the following observations would be removed from the data to ensure the model was not impacted by outliers.
-
+\tiny
 ```{r Outlier Table, echo=FALSE}
 names=c('Williamsburg City','Union County','Aleutians West Census Area','De Baca County','North Slope Borough','Chattahoochee County')
 tableOutliers=c('282','1490','2714','166','2727','2682')
@@ -75,7 +70,7 @@ knitr::kable(outReasons, caption = "Outlier analysis")
 ```
 
 ## Modelling
-
+\normalsize
 We looked for a model that had the following characteristics: simplicity, explanatory power and predictive power. The variable selection methods we used were stepwise variable selection, LASSO regression and ridge regression.
 
 ### Stepwise selection
@@ -96,11 +91,10 @@ rownames(modelTable)=name
 colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
   pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left", "right", "right", "center"), use.hyphening = TRUE)
 ```
-\normalsize
 
 ### LASSO regression
-
-#This code should be sufficent to recreate the model I made on it's own
+\normalsize
+This code should be sufficent to recreate the model I made on it's own
 
 ```{r, eval = FALSE, include=FALSE}
 

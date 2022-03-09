@@ -95,6 +95,7 @@ colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
 \normalsize
 
 Using LASSO variable selection we create a model which includes eight predictor variables including: those in the table below. We expected this as the scatter plots and summary of our initial model suggested they are significant with respect to death rate. with the exception of medIncome. We found this model to have good predictive power. The coefficients for each of these variables are as follows.
+
 \tiny
 ```{r Model Table LASSO, echo = FALSE}
 library(sylly)

@@ -67,7 +67,18 @@ Some transformations of the variables were completed in order to fulfil the mode
 
 Several observations were identified as having a high leverage and after testing for influencial observations we declared that the following observations would be removed from the data to ensure the model was not impacted by outliers.
 
-**Table FOR OUTLIERS HERE**
+```{r, echo=FALSE}
+dfBetaVals=dfbetas(Model1)
+indices=which(abs(dfbetas(Model1))>0.4)
+outliers=(which(abs(dfbetas(Model1))>0.4)%%3047)
+names=unique(cancer$County[outliers])
+tableOutliers=unique(outliers)
+reasons=c('Incidence rate, Median Age Female, Percent Married, Percent Married Households, Percent Employer Private Coverage','Incidence rate','Median Age Male, Average Household Size','Average Household Size','Percent Married Households','Percent Private Coverage, Percent Employer Private Coverage')
+outReasons=as.table(t(matrix(data=c(tableOutliers,reasons),ncol=6,nrow=2,byrow=TRUE)))
+rownames(outReasons)=names
+colnames(outReasons)=c('Index','Problematic Variable(s)')
+knitr::kable(outReasons, caption = "Outlier analysis")
+```
 
 ## Modelling
 

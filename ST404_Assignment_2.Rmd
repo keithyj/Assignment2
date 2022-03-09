@@ -254,10 +254,10 @@ We will assess the adequacy of the model by checking if the functional form of t
 
 ``` {r, echo = FALSE, eval = TRUE,fig.height=1.8,fig.width=6}
 # Identify any heteroscedasticity and non-linearity
-par(mar=c(1, 4.4, 1, 1.9))
+par(mar=c(1.2, 4.4, 1.2, 1.9))
 par(mfrow=c(1,2))
-plot(Model0, 1)
-plot(Model0, 3)
+plot(Model0, 1, cex=0.5)
+plot(Model0, 3, cex=0.5)
 ```
 
 We can see from the plots that there exists heteroscedasticity and non-linearity. We also notice from our initial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. We do this by using Box-Cox and observations after trialling log transformations. We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations: $log$(PctBlack$+0.1$), incidenceRate^1.5^, PctUnemployed16_Over^0.5^ and  $log$(medIncome).
@@ -299,10 +299,10 @@ plot(lm(deathRate ~ medIncome, data = cancer5), 3)
 ``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%'}
 par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(2,2))
-plot(lm(deathRate ~ PctBlack, data = cancer5), 1)
-plot(lm(deathRate ~ PctBlack, data = cancer5), 3)
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1)
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3)
+plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5)
+plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5)
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5)
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5)
 ```
 
 These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This could be due to influencial outliers.
@@ -314,8 +314,8 @@ Model1 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + M
 
 # Identify any heteroscedascity and non-linearity 
 par(mfrow=c(1,2))
-plot(Model1, 1)
-plot(Model1, 3)
+plot(Model1, 1, cex=0.5)
+plot(Model1, 3,cex=0.5)
 ```
 
 
@@ -486,7 +486,7 @@ The graphs below show that the Residuals vs Fitted plot and the Scale-Location p
 par(mar=c(1.5, 4.4, 2, 1.5))
 par(mfrow=c(2,2))
 for (i in (1:4)) {
-  plot(BICmodel4,i)
+  plot(BICmodel4,i, cex=0.5)
 }
 ```
 
@@ -494,9 +494,8 @@ for (i in (1:4)) {
 
 To determine how well the model predicts values we use leave one out cross validation (LOOCV). This is included in the package `caret`. We ran this on the model suggested by BIC stepwise regression and the summary is given in the table below.
 
-\tiny
 ```{r Cross validation, echo=FALSE}
-crossVal=as.table(matrix(data=c(20.98,0.4176,16.09),nrow=1,ncol=3,byrow = TRUE))
+crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))
 rownames(crossVal)=c('BIC stepwise model')
 colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
 knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
@@ -537,13 +536,14 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cance
 ```{r Model Table LASSO, echo = FALSE}
 library(sylly)
 name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
-       'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
+       'PctPublicCoverage','Edu18_24','RegionNortheast','RegionSouth','RegionWest')
 beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
-rownames(modelTable)=name
-colnames(modelTable)=c('Parameter estimate')
-pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
+modelTable=as.table(matrix(data=c(beta),nrow=1,ncol=9))
+colnames(modelTable)=name
+rownames(modelTable)=c('Parameter estimate')
+pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center","left","left","left","left","left","left","left","left"), use.hyphening = TRUE)
 ```
+
 
 ```{r Cross Validation LASSO, echo = FALSE} 
 par(mfrow = c(1,1))
@@ -553,13 +553,13 @@ abline(v = log(cvLASSO$lambda.1se), col = "red")
 legend("bottomleft",legend=c("Minimum lambda", "1 standard error larger lambda"),lty=c(1,1),col=c("blue","red"), ins=0.05, bty = "n")
 ```
 
-```{r, echo = FALSE}
-par(mfrow = c(1,1))
+```{r, echo = FALSE, fig.width=9 , fig.height=2.25}
+par(mfrow = c(1,2),mar=c(2, 4.4, 2, 1.9))
 bin <- scale(LASSOresiduals)
 bin1 <- which(bin < 0)
 bin[bin1] <- -bin[bin1]
-plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals")
-plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals")
+plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals",cex=0.5)
+plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
 ```
 
 ## Ridge Regression

@@ -166,12 +166,21 @@ Model plots -
 par(mfrow=c(2,2))
 plot(model)
 ```
+### Limitations
 
+
+ ••• STILL NEED TO DO •••
+ 
+### What are the major determinants of high mortality rates?
+
+ ••• STILL NEED TO DO •••
+ 
 ### Areas of the US with unusually low or high mortality rates that do not conform to the general pattern
-
+ 
+ ••• STILL NEED TO DO •••
+ 
 We look for outliers within our model, as well as seeing if the counties we removed for having high leverage initially conform to our model and therefore to the general pattern. 
 
-### Limitations
 
 
 # Statistical Methodology

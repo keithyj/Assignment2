@@ -93,7 +93,6 @@ colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
 
 ### LASSO regression
 \normalsize
-This code should be sufficent to recreate the model I made on it's own
 
 ```{r, eval = FALSE, include=FALSE}
 
@@ -136,10 +135,10 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cance
 \tiny
 ```{r Model Table LASSO, echo = FALSE}
 library(sylly)
-name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
+name=c('intercept','incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
        'PctPublicCoverage','Edu18_24','RegionNortheast','RegionSouth','RegionWest')
-beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
+beta=c('387','0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
+modelTable=as.table(matrix(data=c(beta),nrow=10,ncol=1))
 rownames(modelTable)=name
 colnames(modelTable)=c('Parameter estimate')
 pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
@@ -153,7 +152,7 @@ The ridge regression method keeps all variables in the final model and produces 
 
 ## Final Model
 
-Our final model is produced by the LASSO variable selection methodcan be summarised in the table below. 
+Our final model is produced by the LASSO variable selection method can be summarised in the table below. 
 
 ```{r,eval=FALSE,echo=FALSE}
 DF <- data.frame(row.names=c(),coefficient=c(),p-value=c())
@@ -188,7 +187,7 @@ plot(model)
  
  ••• STILL NEED TO DO •••
  
-We look for outliers within our model, as well as seeing if the counties we removed for having high leverage initially conform to our model and therefore to the general pattern. 
+We look for outliers within our model, as well as seeing if the counties we removed for having high leverage initially conform to our model and therefore to the general pattern.  
 
 \pagebreak
 

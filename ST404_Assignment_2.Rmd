@@ -95,7 +95,6 @@ colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
 \normalsize
 
 Using LASSO variable selection we create a model which includes eight predictor variables including: those in the table below. We expected this as the scatter plots and summary of our initial model suggested they are significant with respect to death rate. with the exception of medIncome. We found this model to have good predictive power. The coefficients for each of these variables are as follows.
-
 \tiny
 ```{r Model Table LASSO, echo = FALSE}
 library(sylly)
@@ -277,8 +276,8 @@ par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(2,2))
 plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5,main="log(PctBlack) Residuals Fitted",caption="")
 plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5,main="log(PctBlack) Scale location",caption="")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctUnemployed16^0.5 Residuals Fitted",caption="")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemployed16^0.5 Scale location",caption="")
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctUnemplyed16^0.5 Residuals Fitted",caption="")
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemplyed16^0.5 Scale location",caption="")
 ```
 
 These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This can be seen in the residual vs fitted and scale location plots of the full model with these transformations presented below. This could be due to influencial outliers.
@@ -796,4 +795,13 @@ rsquared2.ridge <- sum((predicteddeathRate.ridge - cancer5$deathRate)^2)
 
 rsquared.ridge <- (1 - (rsquared2/rsquared1))
 rsquared.ridge
+```
+
+# Authors' Contributions
+
+``` {r Author's table, echo=FALSE}
+crossVal=as.table(matrix(data=c('Initial analysis before variable selection and model comparison','LASSO method section','Initial analysis before variable selection','Stepwise regression section'),nrow=2,ncol=3,byrow = TRUE))
+rownames(crossVal)=c('Conor','Daniel','James','Sam')
+colnames(crossVal)=c('Contribution')
+knitr::kable(crossVal, caption = "Authors' Contribution")
 ```

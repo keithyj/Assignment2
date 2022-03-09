@@ -520,39 +520,21 @@ The adjusted R Squared value was (fill)
 The variance inflation factor for the variables included did not exceed 2, suggesting no issuees with multicolinearity. 
 Residuals are homoscedastic and uncorrelated. However the residuals did not demonstrate a normal distribution. 
 
-
-
 ```{r, eval = FALSE}
-
-cancer3 <- cancerRaw
-cancer3 <- cancer3[-c(1489,2713,1941,1490),]
-
-cancer3 = separate(cancer3,"Geography",c("County","State"),sep = ", ")
-cancer3 <- cancer3 %>%
-  mutate(Region = case_when(
-    State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
-    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
-    State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
-    State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
-  ))
-cancer3$Region <-  factor(cancer3$Region)
-
-cancerLASSO <- cancer3[,-c(1,2,5,11,19)]
-
-cancerLASSO$incidenceRate <- boxcox(cancerLASSO$incidenceRate, p = 1.5)
-cancerLASSO$PctBlack <- log(cancerLASSO$PctBlack + 0.1 )
+cancerLASSO <- cancer5[,-c(1,2,17)]
 
 cancerLASSO <- model.matrix(~., data = cancerLASSO)
 
 LASSO <- glmnet(cancerLASSO, cancer3$deathRate, alpha = 1) 
+set.seed(6)
 cvLASSO <- cv.glmnet(cancerLASSO, cancer3$deathRate, alpha = 1)
 LASSOmodel <- glmnet(cancerLASSO, cancer3$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
+
 
 LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
 LASSOresiduals <- cancer3$deathRate - LASSOpredicted
 
-LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer$deathRate - mean(cancer$deathRate))^2))
-
+LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer3$deathRate - mean(cancer3$deathRate))^2))
 ```
 
 ## Ridge Regression

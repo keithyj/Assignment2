@@ -465,17 +465,6 @@ for (i in (1:4)) {
 }
 ```
 
-**Cross validation**
-
-To determine how well the model predicts values we use leave one out cross validation (LOOCV). This is included in the package `caret`. We ran this on the model suggested by BIC stepwise regression and the summary is given in the table below.
-
-```{r Cross validation1, echo=FALSE}
-crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))
-rownames(crossVal)=c('BIC stepwise model')
-colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
-knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
-```
-
 ## LASSO
 \normalsize
 
@@ -550,7 +539,7 @@ The Ridge regression produces a linear model with an R^2 value of 0.484, and a m
 To compare how well the models predict values we used leave one out cross validation (LOOCV). We ran this on the model suggested by BIC stepwise regression and the LASSO model and the summary is given in the table below.
 
 ```{r Cross validation, echo=FALSE}
-crossVal=as.table(matrix(data=c(20.98,16.09,0.4176,19.73,NA,0.4849),nrow=1,ncol=3,byrow = TRUE))
+crossVal=as.table(matrix(data=c(20.98,16.09,0.4176,19.73,NA,0.4849),nrow=2,ncol=3,byrow = TRUE))
 rownames(crossVal)=c('BIC stepwise model','LASSO Model')
 colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
 knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
@@ -733,6 +722,7 @@ nullTransModel=lm(deathRate~1,data=cancer5)
 
 #### AIC Stepwise
 ```{r AIC StepwiseAppendix, eval=FALSE}
+#Created a stepwise model using AIC
 AICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel))
 ols_coll_diag(AICmodel1)
 ```
@@ -740,6 +730,7 @@ ols_coll_diag(AICmodel1)
 #### BIC Stepwise
 
 ```{r BIC Stepwise 1Appendix, eval=FALSE}
+#Created a stepwise model using BIC
 BICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
 ols_coll_diag(BICmodel1)
 summary(BICmodel1)

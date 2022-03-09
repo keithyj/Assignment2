@@ -284,7 +284,7 @@ boxcox <- function(x, p){
 # Declare new dataframe from old
 cancer5=cancer
 #Scaling PctBlack 
-cancer5$PctBlack=cancer5$PctBlack + 0.1
+cancer5$PctBlack=(cancer5$PctBlack) + 0.1
 # Transformations
 cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
 cancer5$medIncome=log(cancer5$medIncome)
@@ -386,7 +386,7 @@ library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
 ```
-This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which we used as the cut off echoing Liao et al (2012), is PctEmpPrivCoverage when condition index is 45.36. When the condition index is 48, PctPublicCoverage is an issue. When the condition index is 78 PctPrivateCoverage and Edu19_24 are issues. When the condition index is 123, issues lie with MedianAgeMale and Female. When condition index is 159, issues lie with AvgHouseholdSize, PctMarried and PctMarriedHouseholds. When condition index is 262, the issues are with when condition index is 262.44: incidenceRate is an issue. povertyPercent, intercept and medIncome when the condition index is 547.2. 
+This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which we used as the cut off echoing Liao et al (2012), is PctEmpPrivCoverage and Edu18_24 when condition index is 45.92. When the condition index is 50.24, PctPublicCoverage is an issue. When the condition index is 80.46, PctPrivateCoverage and Edu19_24 are issues. When the condition index is 101.87, issues lie with PercentMarried and PctMarriedHouseholds. When condition index is 124.7, issues lie with MedianAgeMale & Female. When condition index is 174.74, the issues are with AvgHouseholdSize, PercentMarried and PctMarriedHouseholds. When condition index is 679.76: the intercept, medIncome, and povertyPercent presents an issue.
 
 We can see that the variables that show, to some degree, multicollinearity are: povertyPercent and medIncome, AvgHouseholdSize, PercentMarried and PctMarriedHouseholds, MedianAgeMale and MedianAgeFemale, and PctPrivateCoverage and Edu19_24.
 

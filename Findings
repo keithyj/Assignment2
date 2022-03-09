@@ -62,46 +62,6 @@ All of the variables also have low p-values, they are all significant at the 0.1
 
 ### LASSO regression
 
-#This code shoudl be sufficent to recreate the model I made on it's own
-
-```{r, eval = FALSE}
-
-cancer5 <- cancerRaw
-cancer5$AvgHouseholdSize[cancer5$AvgHouseholdSize <= 0.1] <- cancer5$AvgHouseholdSize[cancer5$AvgHouseholdSize <= 0.1]*100
-cancer5 <- cancer5[-c(2682, 282, 166, 2727, 2714, 1490),]
-
-cancer5 = separate(cancer5,"Geography",c("County","State"),sep = ", ")
-cancer5 <- cancer5 %>%
-  mutate(Region = case_when(
-    State %in% c("New Hampshire","New Jersey","New York","Maine","Massachusetts","Vermont","Connecticut","Pennsylvania","Rhode Island") ~ "Northeast",
-    State %in% c("Wisconsin","Nebraska","Michigan","Minnesota","North Dakota","Missouri","Kansas","Ohio","Indiana","Iowa","Illinois","South Dakota") ~ "Midwest",
-    State %in% c("West Virginia","Virginia","North Carolina","Alabama","Arkansas","Tennessee","Texas","Louisiana","Maryland","Mississippi","Kentucky","Delaware","District of Columbia","Florida","Oklahoma","South Carolina","Georgia") ~ "South",
-    State %in% c("Washington","Nevada","New Mexico","California","Montana","Utah","Colorado","Wyoming","Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
-  ))
-cancer5$Region <-  factor(cancer5$Region)
-
-cancerLASSO <- cancer5[,-c(1,2,5,11,19)]
-
-cancerLASSO$incidenceRate <- boxcox(cancerLASSO$incidenceRate, p = 1.5)
-cancerLASSO$PctBlack <- log(cancerLASSO$PctBlack + 0.1 )
-cancerLASSO$PctUnemployed16_Over <- boxcox(cancerLASSO$PctUnemployed16_Over, p = 0.5)
-cancerLASSO$medIncome <- log(cancerLASSO$medIncome)
-
-
-cancerLASSO <- model.matrix(~., data = cancerLASSO)
-
-LASSO <- glmnet(cancerLASSO, cancer5$deathRate, alpha = 1) 
-cvLASSO <- cv.glmnet(cancerLASSO, cancer5$deathRate, alpha = 1)
-LASSOmodel <- glmnet(cancerLASSO, cancer5$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
-
-
-LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
-LASSOresiduals <- cancer5$deathRate - LASSOpredicted
-
-LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
-
-```
-
 
 
 ## The final model

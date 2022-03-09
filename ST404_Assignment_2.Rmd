@@ -34,7 +34,7 @@ library(glmnet)
 library(caret)
 ```
 
-/pagebreak 
+\pagebreak 
 
 # Findings
 
@@ -283,11 +283,13 @@ boxcox <- function(x, p){
 ``` {r transformations, include = FALSE}
 # Declare new dataframe from old
 cancer5=cancer
+#Scaling PctBlack 
+cancer5$PctBlack=cancer5$PctBlack + 0.1
 # Transformations
 cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
 cancer5$medIncome=log(cancer5$medIncome)
 cancer5$PctUnemployed16_Over=boxcox(cancer5$PctUnemployed16_Over, p = 0.5)
-cancer5$PctBlack=log(cancer5$PctBlack+0.1)
+cancer5$PctBlack=log(cancer5$PctBlack)
 
 ```
 

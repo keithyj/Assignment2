@@ -469,7 +469,7 @@ for (i in (1:4)) {
 
 To determine how well the model predicts values we use leave one out cross validation (LOOCV). This is included in the package `caret`. We ran this on the model suggested by BIC stepwise regression and the summary is given in the table below.
 
-```{r Cross validation, echo=FALSE}
+```{r Cross validation1, echo=FALSE}
 crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))
 rownames(crossVal)=c('BIC stepwise model')
 colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')

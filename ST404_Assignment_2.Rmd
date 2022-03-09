@@ -547,7 +547,15 @@ The Ridge regression produces a linear model with an R^2 value of 0.484, and a m
 
 ## Comparison of models found from variable selection
 
+To compare how well the models predict values we used leave one out cross validation (LOOCV). We ran this on the model suggested by BIC stepwise regression and the LASSO model and the summary is given in the table below.
 
+```{r Cross validation, echo=FALSE}
+crossVal=as.table(matrix(data=c(20.98,16.09,0.4176,19.73,NA,0.4849),nrow=1,ncol=3,byrow = TRUE))
+rownames(crossVal)=c('BIC stepwise model','LASSO Model')
+colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
+knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
+```
+The table shows that the LASSO model has better predictive and explanatory power through its R^2^ value and its mean squared error.
 
 
 ## Limitations and recommendations for improvements in future work

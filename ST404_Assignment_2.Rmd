@@ -58,6 +58,7 @@ Some transformations of the variables were completed in order to fulfil the mode
 ## Outliers and Influencial Observations
 
 Several observations were identified as having a high leverage and after testing for influencial observations we declared that the following observations would be removed from the data to ensure the model was not impacted by outliers.
+
 \tiny
 ```{r Outlier Table, echo=FALSE}
 names=c('Williamsburg City','Union County','Aleutians West Census Area','De Baca County','North Slope Borough','Chattahoochee County')
@@ -652,7 +653,9 @@ boxcox <- function(x, p){
 
 # References
 
+Liao D, Valliant R. 2012. Condition indexes and variance decompositions for diagnosing collinearity in linear model analysis of survey data. *Survey Methodology*. **38**(2),pp.189–202.
+
 United States Census Bureau. 2010. *United States Census Bureau*. [Online]. [Accessed 8th March 2022]. Available from: https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
 
-Liao D, Valliant R. 2012. Condition indexes and variance decompositions for diagnosing collinearity in linear model analysis of survey data. *Survey Methodology*. **38**(2),pp.189–202.
+
 

@@ -133,8 +133,20 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cance
 
 ```
 
-### Ridge Regression
+\tiny
+```{r Model Table LASSO, echo = FALSE}
+library(sylly)
+name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
+       'PctPublicCoverage','Edu18_24','RegionNortheast','RegionSouth','RegionWest')
+beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
+modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
+rownames(modelTable)=name
+colnames(modelTable)=c('Parameter estimate')
+pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
+```
 
+### Ridge Regression
+\normalsize
 The ridge regression method keeps all variables in the final model and produces the following model:
 
 **Put RIDGE model here**
@@ -197,7 +209,7 @@ cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSi
 #removing PctEmployed16_Over and binnedInc from the dataset used for modelling.
 cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 ```
-We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions [@Divisions]. These regions are Northeast, Midwest, South and West.
+We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions [Divisions]. These regions are Northeast, Midwest, South and West.
 
 ``` {r region variable, include=FALSE}
 #Split Geography into county and state
@@ -254,7 +266,7 @@ We will assess the adequacy of the model by checking if the functional form of t
 
 ``` {r, echo = FALSE, eval = TRUE,fig.height=1.8,fig.width=6}
 # Identify any heteroscedasticity and non-linearity
-par(mar=c(1.2, 4.4, 1.2, 1.9))
+par(mar=c(1.8, 4.4, 1.8, 1.9))
 par(mfrow=c(1,2))
 plot(Model0, 1, cex=0.5)
 plot(Model0, 3, cex=0.5)
@@ -309,7 +321,7 @@ These transformations show evidence of homoscedascity and linearity thus we will
 
 ``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6}
 # Creating updated model with transformed variables
-par(mar=c(1.2, 4.4, 1.2, 1.9))
+par(mar=c(1.8, 4.4, 1.8, 1.9))
 Model1 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer5)
 
 # Identify any heteroscedascity and non-linearity 
@@ -386,7 +398,7 @@ library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
 ```
-This shows that MedianAgeMale, MedianAgeFemale, PctPublicCoverage, PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5, which indicates multicollinearity exists in the model. When looking at the condition index's (CI) above 30, the variance decomposition proportion (v.c.p) above 0.3, which we used as the cut off, establishes those variables which provide evidence of, to some degree, multicollinearity [@ConditionIndex]. We notice eight CI's above 31 and six of these, with CI's equalling 679.76, 174.74, 124.7, 101.87, 80.46, 25.92, have some variables with v.c.p above 0.3. These are (from most significant CI to least): povertyPercent and medIncome; PctMarriedHouseholds, PercentMarried & AvgHouseholdSize; MedianAgeMale and MedianAgeFemale; PctMarriedHouseholds and PercentMarried; PctPrivateCoverage and Edu18_24; Edu18_24 and PctEmpPrivCoverage. When the v.c.p is bigger for a larger CI, this indicates the multicollinearity is more significant.
+This shows that MedianAgeMale, MedianAgeFemale, PctPublicCoverage, PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5, which indicates multicollinearity exists in the model. When looking at the condition index's (CI) above 30, the variance decomposition proportion (v.c.p) above 0.3, which we used as the cut off, establishes those variables which provide evidence of, to some degree, multicollinearity [ConditionIndex]. We notice eight CI's above 31 and six of these, with CI's equalling 679.76, 174.74, 124.7, 101.87, 80.46, 25.92, have some variables with v.c.p above 0.3. These are (from most significant CI to least): povertyPercent and medIncome; PctMarriedHouseholds, PercentMarried & AvgHouseholdSize; MedianAgeMale and MedianAgeFemale; PctMarriedHouseholds and PercentMarried; PctPrivateCoverage and Edu18_24; Edu18_24 and PctEmpPrivCoverage. When the v.c.p is bigger for a larger CI, this indicates the multicollinearity is more significant.
 
 ```{r, include=FALSE}
 #defining boxcox function
@@ -483,7 +495,7 @@ After analysing the condition numbers and the VIFs from this model we were able 
 The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3040 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
 
 ```{r Check Assumptions, echo=FALSE,out.height='70%',out.width='70%'}
-par(mar=c(1.5, 4.4, 2, 1.5))
+par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(2,2))
 for (i in (1:4)) {
   plot(BICmodel4,i, cex=0.5)
@@ -533,19 +545,8 @@ LASSOresiduals <- cancer5$deathRate - LASSOpredicted
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
 ```
 
-```{r Model Table LASSO, echo = FALSE}
-library(sylly)
-name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
-       'PctPublicCoverage','Edu18_24','RegionNortheast','RegionSouth','RegionWest')
-beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-modelTable=as.table(matrix(data=c(beta),nrow=1,ncol=9))
-colnames(modelTable)=name
-rownames(modelTable)=c('Parameter estimate')
-pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center","left","left","left","left","left","left","left","left"), use.hyphening = TRUE)
-```
 
-
-```{r Cross Validation LASSO, echo = FALSE} 
+```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%'} 
 par(mfrow = c(1,1))
 plot(LASSO, "lambda", label = T)
 abline(v = log(cvLASSO$lambda.min), col = "blue")
@@ -554,7 +555,7 @@ legend("bottomleft",legend=c("Minimum lambda", "1 standard error larger lambda")
 ```
 
 ```{r, echo = FALSE, fig.width=9 , fig.height=2.25}
-par(mfrow = c(1,2),mar=c(2, 4.4, 2, 1.9))
+par(mfrow = c(1,2),mar=c(1.8, 4.4, 1.8, 1.9))
 bin <- scale(LASSOresiduals)
 bin1 <- which(bin < 0)
 bin[bin1] <- -bin[bin1]

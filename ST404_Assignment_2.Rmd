@@ -224,7 +224,7 @@ summary(Model0)
 
 We test the null hypothesis that there is no linear association between deathRate and povertyPercent, deathRate and medianAgeMale, and deathRate and PercentMarried. We check the p values for these which show 0.656,  0.936, 0.360, and 0.141, hence we fail to reject the null hypothesis. We will not remove any of these variables from the model at this moment in time as there could be underlying issues as to why they are not significant, such as multicollinearity. 
 
-We will assess the adequacy of the model by checking if the functional form of the model is correct. We will look at the following plots to assess this:
+We will assess the adequacy of the model by checking if the functional form of the model is correct. We will look at the residuals vs fitted and scale location plots for the untransformed full model below:
 
 
 ``` {r, echo = FALSE, eval = TRUE,fig.height=1.8,fig.width=6}
@@ -280,7 +280,7 @@ plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctU
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemplyed16^0.5 Scale location",caption="")
 ```
 
-These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This could be due to influencial outliers.
+These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This can be seen in the residual vs fitted and scale location plots of the full model with these transformations presented below. This could be due to influencial outliers.
 
 ``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6}
 # Creating updated model with transformed variables

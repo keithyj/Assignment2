@@ -563,32 +563,18 @@ One limitation of this data is that the populations in each county are different
 \pagebreak
 
 # Appendix
-
-```{r}
+\tiny
+### Cleaning the Data
+```{r,eval=FALSE}
 #Correlation of employment variables
 cancerNoNAs <- na.omit(cancerRaw)
 cor(cancerNoNAs$PctUnemployed16_Over,cancerNoNAs$PctEmployed16_Over)
-```
-
-```{r,eval=FALSE}
-#Cleaning the data
 cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1]*100
-cancer <- subset(cancer, select=-c(PctEmployed16_Over)) 
-```
-
-Showing fixed AvgHouseholdSize
-
-```{r histogramAvgHouseholdSize included, echo = FALSE, eval = TRUE, message = FALSE, warning = FALSE, fig.asp = 0.4, fig.cap = "Histograms of AvgHouseholdSize after scaling small values"}
-par(mfrow = c(1,2))
-hist(cancerRaw$AvgHouseholdSize, breaks = 30, main = "Raw AvgHouseholdSize", ylab = "Frequency", xlab = "AvgHouseholdSize")
-hist(cancer$AvgHouseholdSize, breaks = 30, main = "Corrected AvgHouseholdSize", ylab = "Frequency", xlab = "AvgHouseholdSize")
-```
-
-
-```{r,eval=FALSE}
+#removing PctEmployed16_Over and binnedInc from the dataset used for modelling.
+cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 #Creating a Region variable, as a factor
-cancer2 = separate(cancer,"Geography",c("County","State"),sep = ", ")
-cancer2 <- cancer2 %>%
+cancer = separate(cancer,"Geography",c("County","State"),sep = ", ")
+cancer <- cancer %>%
   mutate(Region = case_when(
     State %in% c("New Hampshire","New Jersey","New York","Maine",
                  "Massachusetts","Vermont","Connecticut","Pennsylvania",
@@ -605,11 +591,50 @@ cancer2 <- cancer2 %>%
                  "Montana","Utah","Colorado","Wyoming",
                  "Oregon","Hawaii","Idaho","Alaska","Arizona") ~ "West"
   ))
-cancer2$Region <-  factor(cancer2$Region)
+cancer$Region <-  factor(cancer$Region)
 ```
 
+### Initial Model Analysis
+``` {r redundancy, include = FALSE}
+# Looking at scatter plots and identifying any relationships between deathRate and the predictor variables.
+par(mfrow = c(2,3))
+with(cancer, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~PctBlack, ylab = "deathRate", xlab = "PctBlack", lpars = list(col = "red", lwd = 2), main = "deathRate against PctBlack", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~PctPrivateCoverage, ylab = "deathRate", xlab = "PctPrivateCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPrivateCoverage", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~PctPublicCoverage, ylab = "deathRate", xlab = "PctPublicCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPublicCoverage", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~povertyPercent, ylab = "deathRate", xlab = "povertyPercent", lpars = list(col = "red", lwd = 2), main = "deathRate against povertyPercent", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~medIncome, ylab = "deathRate", xlab = "medIncome", lpars = list(col = "red", lwd = 2), main = "deathRate against medIncome", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~incidenceRate, ylab = "deathRate", xlab = "incidenceRate", lpars = list(col = "red", lwd = 2), main = "deathRate against incidenceRate", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~Region, ylab = "deathRate", xlab = "Region", lpars = list(col = "red", lwd = 2), main = "deathRate against Region", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~MedianAgeMale, ylab = "deathRate", xlab = "MedianAgeMale", lpars = list(col = "red", lwd = 2), main = "deathRate against MedianAgeMale", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~MedianAgeFemale, ylab = "deathRate", xlab = "MedianAgeFemale", lpars = list(col = "red", lwd = 2), main = "deathRate against MedianAgeFemale", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~AvgHouseholdSize, ylab = "deathRate", xlab = "AvgHouseholdSize", lpars = list(col = "red", lwd = 2), main = "deathRate against AvgHouseholdSize", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab = "PercentMarried", lpars = list(col = "red", lwd = 2), main = "deathRate against PercentMarried", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
+with(cancer, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
+```
+``` {r adequacy, eval = FALSE}
+# Creating a linear model with all variables from the current dataset
+Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
+#We updated this model after transformations and named it Model1 with the data = cancer5
+# We again updated this model after removing influential observations and named it Model3.
+
+# Checking the output of the model to see significance
+summary(Model0)
+
+# Identify any heteroscedasticity and non-linearity in the initial model using residual vs fitted and scale location plots
+par(mar=c(1.2, 4.4, 1.2, 1.9))
+par(mfrow=c(1,2))
+plot(Model0, 1, cex=0.5)
+plot(Model0, 3, cex=0.5)
+# We repeated this for Model1 to check if homoscedasticity and linearity have improved after transformations
+# We repeated this for Model3 to once again check the model assumptions.
+
+```
+### Updated Model with Transformed Predictors
 ```{r, eval=FALSE}
-#Power transformation UDF
+#Box cox Power transformation UDF - used to find power transformations
 boxcox <- function(x, p){ 
   if (p == 0){
     return(log(x)) 
@@ -618,4 +643,179 @@ boxcox <- function(x, p){
     return((x^p - 1)/p)
   } 
 }
+
+# Declaring new dataframe from old
+cancer5=cancer
+#Scaling PctBlack to remove the issue of 0 values before log
+cancer5$PctBlack=cancer5$PctBlack + 0.1
+# Transformations using boxcox to fix model violations
+cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
+cancer5$medIncome=log(cancer5$medIncome)
+cancer5$PctUnemployed16_Over=boxcox(cancer5$PctUnemployed16_Over, p = 0.5)
+cancer5$PctBlack=log(cancer5$PctBlack)
+
+#Check for any updated heteroscedascity and linearity in incidence rate and medIncome (not shown)
+plot(lm(deathRate ~ incidenceRate, data = cancer5), 1)
+plot(lm(deathRate ~ incidenceRate, data = cancer5), 3)
+plot(lm(deathRate ~ medIncome, data = cancer5), 1)
+plot(lm(deathRate ~ medIncome, data = cancer5), 3)
+# The same code was used to check for PctBlack and PctUnemployed16_Over as shown in Statistical Methodology.
+```
+
+### Outliers/Influencial Obsevations
+``` {r CheckOutliers, eval = FALSE}
+par(mfrow=c(1,2))
+ols_plot_resid_lev(Model1)
+# This plot shows that the observations that are outliers with high leverage
+par(mfrow=c(2,2))
+ols_plot_dfbetas(Model1)
+# This plot shows the observations DFBETA which we have used to produce the table in the Outliers section. These are all outliers with DFBETA > 0.4
+
+#remove the influencial outliers in the dataset
+library(dplyr)
+cancer5 <-  slice(cancer5, -c(2682, 282, 166, 2727, 2714, 1490))
+#Check the number of observations in the sample space
+summary(cancer5)
+```
+
+### Check Redundancy of the Linear Model
+``` {r summarymod3, eval = FALSE}
+# Use the summary of the current model and compare to scatter plots that show correlations to check for significance between predictors in the model with deathRate
+summary(Model3)
+
+# Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
+par(mfrow = c(2,3))
+with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctBlack, ylab = "deathRate", xlab = "PctBlack", lpars = list(col = "red", lwd = 2), main = "deathRate against PctBlack", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctPrivateCoverage, ylab = "deathRate", xlab = "PctPrivateCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPrivateCoverage", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctPublicCoverage, ylab = "deathRate", xlab = "PctPublicCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctPublicCoverage", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~povertyPercent, ylab = "deathRate", xlab = "povertyPercent", lpars = list(col = "red", lwd = 2), main = "deathRate against povertyPercent", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~medIncome, ylab = "deathRate", xlab = "medIncome", lpars = list(col = "red", lwd = 2), main = "deathRate against medIncome", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~incidenceRate, ylab = "deathRate", xlab = "incidenceRate", lpars = list(col = "red", lwd = 2), main = "deathRate against incidenceRate", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~Region, ylab = "deathRate", xlab = "Region", lpars = list(col = "red", lwd = 2), main = "deathRate against Region", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~MedianAgeMale, ylab = "deathRate", xlab = "MedianAgeMale", lpars = list(col = "red", lwd = 2), main = "deathRate against MedianAgeMale", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~MedianAgeFemale, ylab = "deathRate", xlab = "MedianAgeFemale", lpars = list(col = "red", lwd = 2), main = "deathRate against MedianAgeFemale", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~AvgHouseholdSize, ylab = "deathRate", xlab = "AvgHouseholdSize", lpars = list(col = "red", lwd = 2), main = "deathRate against AvgHouseholdSize", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab = "PercentMarried", lpars = list(col = "red", lwd = 2), main = "deathRate against PercentMarried", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
+```
+
+### Multicollinearity
+``` {r multicollinearity, eval = FALSE}
+library(olsrr)
+# Produce tables showing the VIF of variables in the current model, as well as tolerance, condition index and variance decomposition proportion.
+ols_coll_diag(Model3)
+#Look for low tolerance, VIF > 5 and condition index > 30 to see any issues with multicollinearity.
+```
+
+
+### Variable Selection: Stepwise Regression 
+```{r Define null and full models, echo=FALSE}
+# Create the model including all variables after removal of the variables showing no significance of a relationship with deathRate
+fullTransModel=lm(deathRate ~ Edu18_24 + medIncome + PctMarriedHouseholds + 
+                    PctBlack + PctPublicCoverage + PctPrivateCoverage + 
+                    PctUnemployed16_Over + PercentMarried + povertyPercent + 
+                    incidenceRate + Region,
+                  data = cancer5)
+# Create a model including no variables
+nullTransModel=lm(deathRate~1,data=cancer5)
+```
+
+#### AIC Stepwise
+```{r AIC Stepwise, eval=FALSE}
+AICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel))
+ols_coll_diag(AICmodel1)
+```
+
+#### BIC Stepwise
+
+```{r BIC Stepwise 1, eval=FALSE}
+BICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
+ols_coll_diag(BICmodel1)
+summary(BICmodel1)
+# We did the same for BICmodel2 after adding an intercept term of 0 to the fullTransmodel and nullTransmodel.
+# We did the same for BICmodel3 after removing medIncome. 
+# We did the same for BICmodel4 after removing medIncome and Region. 
+
+#For BIC Stepwise 2
+fullTransModel=lm(deathRate ~ 0 + Edu18_24 + medIncome + PctMarriedHouseholds + 
+                    PctBlack + PctPublicCoverage + PctPrivateCoverage + 
+                    PctUnemployed16_Over + PercentMarried + povertyPercent + 
+                    incidenceRate + Region,
+                  data = cancer5)
+# Same code but removed medIncome for the BICmodel3 
+# Same code but removed medIncome and Region for the BICmodel4 
+nullTransModel=lm(deathRate~0,data=cancer5)
+```
+
+```{r Check Assumptions, eval=FALSE}
+# Checking the model assumptions of BICmodel4
+par(mar=c(1.5, 4.4, 2, 1.5))
+par(mfrow=c(2,2))
+for (i in (1:4)) {
+  plot(BICmodel4,i, cex=0.5)
+}
+```
+
+#### Cross Validation of BIC Stepwise Model
+```{r Cross validation, eval=FALSE}
+#Included in Statistical methodology
+crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))
+rownames(crossVal)=c('BIC stepwise model')
+colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
+knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
+```
+
+### LASSO Regression
+```{r, eval = FALSE}
+cancerLASSO <- cancer5[,-c(1,2,17)]
+cancerLASSO <- model.matrix(~., data = cancerLASSO)
+LASSO <- glmnet(cancerLASSO, cancer5$deathRate, alpha = 1) 
+set.seed(6)
+cvLASSO <- cv.glmnet(cancerLASSO, cancer5$deathRate, alpha = 1)
+LASSOmodel <- glmnet(cancerLASSO, cancer5$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
+LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
+LASSOresiduals <- cancer5$deathRate - LASSOpredicted
+LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
+```
+
+
+```{r Cross Validation LASSO, eval = FALSE} 
+par(mfrow = c(1,1))
+plot(LASSO, "lambda", label = T)
+abline(v = log(cvLASSO$lambda.min), col = "blue")
+abline(v = log(cvLASSO$lambda.1se), col = "red")
+legend("bottomleft",legend=c("Minimum lambda", "1 standard error larger lambda"),lty=c(1,1),col=c("blue","red"), ins=0.05, bty = "n")
+```
+
+```{r, eval = FALSE}
+par(mfrow = c(1,2),mar=c(2, 4.4, 2, 1.9))
+bin <- scale(LASSOresiduals)
+bin1 <- which(bin < 0)
+bin[bin1] <- -bin[bin1]
+plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals",cex=0.5)
+plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
+```
+
+### Ridge Regression
+
+``` {r ridge, eval = FALSE}
+set.seed(3041)
+ridge.fit <- cv.glmnet(model.matrix(Model3), cancer5$deathRate, alpha = 0, nrow = 3041)
+
+optimallamda.ridge <- ridge$lambda.min
+predicteddeathRate.ridge <- predict(ridge.fit, s = optimallamda, newx = model.matrix(Model3))
+
+predicted.ridge <- cv.glmnet(model.matrix(Model3), cancer5$deathRate, type.measure = 'mse', keep = TRUE, alpha = 0, nrow = 3041)
+lamda.ridge <- predicted.ridge$lambda.min
+mse2.ridge <- predicted.ridge$cvm[predicted.ridge$lambda == lamda.ridge]
+mse2.ridge
+
+rsquared1.ridge <- sum((cancer5$deathRate - mean(cancer5$deathRate))^2)
+rsquared2.ridge <- sum((predicteddeathRate.ridge - cancer5$deathRate)^2)
+
+rsquared.ridge <- (1 - (rsquared2/rsquared1))
+rsquared.ridge
 ```

@@ -561,7 +561,7 @@ One limitation of this data is that the populations in each county are different
 
 # Appendix
 \tiny
-### Cleaning the Data
+## Cleaning the Data
 ```{r, eval=FALSE}
 #Correlation of employment variables
 cancerNoNAs <- na.omit(cancerRaw)
@@ -591,7 +591,7 @@ cancer <- cancer %>%
 cancer$Region <-  factor(cancer$Region)
 ```
 
-### Initial Model Analysis
+## Initial Model Analysis
 ``` {r redundancyAppendix, include = FALSE}
 # Looking at scatter plots and identifying any relationships between deathRate and the predictor variables.
 par(mfrow = c(2,3))
@@ -618,7 +618,7 @@ plot(Model0, 3, cex=0.5)
 # We repeated this for Model3 to once again check the model assumptions.
 
 ```
-### Updated Model with Transformed Predictors
+## Updated Model with Transformed Predictors
 ```{r, eval=FALSE}
 #Box cox Power transformation UDF - used to find power transformations
 boxcox <- function(x, p){ 
@@ -648,7 +648,7 @@ plot(lm(deathRate ~ medIncome, data = cancer5), 3)
 # The same code was used to check for PctBlack and PctUnemployed16_Over as shown in Statistical Methodology.
 ```
 
-### Outliers/Influencial Obsevations
+## Outliers/Influencial Obsevations
 ``` {r CheckOutliersAppendix, eval = FALSE}
 par(mfrow=c(1,2))
 ols_plot_resid_lev(Model1)
@@ -664,7 +664,7 @@ cancer5 <-  slice(cancer5, -c(2682, 282, 166, 2727, 2714, 1490))
 summary(cancer5)
 ```
 
-### Check Redundancy of the Linear Model
+## Check Redundancy of the Linear Model
 ``` {r summarymod3Appendix, eval = FALSE}
 # Use the summary of the current model and compare to scatter plots that show correlations to check for significance between predictors in the model with deathRate
 summary(Model3)
@@ -677,7 +677,7 @@ with(cancer5, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate",
 
 ```
 
-### Multicollinearity
+## Multicollinearity
 ``` {r multicollinearityAppendix, eval = FALSE}
 library(olsrr)
 # Produce tables showing the VIF of variables in the current model, as well as tolerance, condition index and variance decomposition proportion.
@@ -686,7 +686,7 @@ ols_coll_diag(Model3)
 ```
 
 
-### Variable Selection: Stepwise Regression 
+## Variable Selection: Stepwise Regression 
 ```{r Define null and full modelsAppendix, echo=FALSE}
 # Create the model including all variables after removal of the variables showing no significance of a relationship with deathRate
 fullTransModel=lm(deathRate ~ Edu18_24 + medIncome + PctMarriedHouseholds + 
@@ -698,14 +698,14 @@ fullTransModel=lm(deathRate ~ Edu18_24 + medIncome + PctMarriedHouseholds +
 nullTransModel=lm(deathRate~1,data=cancer5)
 ```
 
-#### AIC Stepwise
+### AIC Stepwise
 ```{r AIC StepwiseAppendix, eval=FALSE}
 #Created a stepwise model using AIC
 AICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel))
 ols_coll_diag(AICmodel1)
 ```
 
-#### BIC Stepwise
+### BIC Stepwise
 
 ```{r BIC Stepwise 1Appendix, eval=FALSE}
 #Created a stepwise model using BIC
@@ -736,7 +736,7 @@ for (i in (1:4)) {
 }
 ```
 
-#### Cross Validation of BIC Stepwise Model
+### Cross Validation of BIC Stepwise Model
 ```{r Cross validationAppendix, eval=FALSE}
 #Included in Statistical methodology
 crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))
@@ -745,7 +745,7 @@ colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared'
 knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
 ```
 
-### LASSO Regression
+## LASSO Regression
 ```{r, eval = FALSE}
 cancerLASSO <- cancer5[,-c(1,2,17)]
 cancerLASSO <- model.matrix(~., data = cancerLASSO)
@@ -776,7 +776,7 @@ plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values",
 plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
 ```
 
-### Ridge Regression
+## Ridge Regression
 
 ``` {r ridgeAppendix, eval = FALSE}
 set.seed(3041)

@@ -324,7 +324,7 @@ The new model presents linearity and the heteroscedascity has been reduced, but 
 Outliers are not always a cause for concern: however, if they have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will go on to calculate if any outliers exist and if they have high leverage, then deduce if these are influencial by using residual leverage plots and DFBETAS.
 
 
-``` {r CheckOutliers, echo = FALSE}
+``` {r CheckOutliers, include = FALSE}
 par(mfrow=c(1,2))
 ols_plot_resid_lev(Model1)
 # This plot shows that the observations that are outliers with high leverage that we declare highly influencial are 2682, 282, 166, 2727, and 2714.
@@ -333,7 +333,7 @@ ols_plot_dfbetas(Model1)
 # This plot shows that the observations 2682, 282, 166, 2727, and 2714 all have a DFBETA > 0.4.
 ```
 
-Observations 2682, 282, 166, 2727, and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model. We will also decide to remove the observation "Union County, Florida" due to the nature of this outlier influencing the data **Need reference**.
+Observations 2682, 282, 166, 2727, 1490 and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model. We investigated these further for the nature of the influence, our research reinforced our decision to remove as for example Union County, Florida is a county where prisoners with lung cancer are sent. **Need reference**.
 
 ``` {r removeoutliers, include = FALSE}
 #remove the influencial outliers.

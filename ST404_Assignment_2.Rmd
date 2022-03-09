@@ -141,8 +141,7 @@ plot(model)
 ```
 ### Limitations
 
-
- ••• STILL NEED TO DO •••
+Stepwise regression is not favoured over LASSO because LASSO has a better system of penalising results because it has a tuning parameter. Stepwise will often overfit the model to gain a better value of R^2^ and so you get an inflated R^2^ value. This results in a model which is not necesarrily the best at explaining or predicting the data. LASSO also has limitations in that it does not account for multicollinearity but this is also an issue in stepwise regression, so LASSO is a lot better than stepwise regression.
  
 ### What are the major determinants of high mortality rates?
 

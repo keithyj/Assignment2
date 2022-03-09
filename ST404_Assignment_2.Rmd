@@ -405,27 +405,11 @@ boxcox <- function(x, p){
 
 **Initial Ideas**
 
-Before attempting to fit any models or try stepwise regression, we looked at what variables we thought would be most important in determining the death rate within a county. We came to the conclusion that incidence rate would be the most important. Median income within a region as well as the type of health coverage in that region would be important. The median age in a county may also affect the death rate. Additionally, an intercept may need to be excluded as it makes no sense to predict the death rate to be greater than zero when all variables (particularly incidence rate) are equal to zero.
+Before attempting to fit any models or try stepwise regression, we looked at what variables we thought would be most important in determining the death rate within a county. In summary, incidence rate is the most important followed by the type of insurance and an indicator of wealth. Also an intercept term does not make much sense as if there is no incidence rate then there should be no deaths. 
 
-We also looked at combinations of variables that could be problematic if they are in the same model. This was based heavily on the correlation between variables. The correlation values suggest that we should not include more than one variable explaining the type of health coverage, both of `povertyPercent` and `medIncome`, both of the median age variables or both of the marriage rate variables. 
+**AIC Stepwise Regression**
 
-```{r, include=FALSE,eval=FALSE,message=FALSE}
-require(corrplot)
-correlations1 <- cor(cancer[,c(2,3,5:17)],method='spearman')
-corrplot(correlations1,method='square',title='Spearman Correlation plot', tl.col="black", tl.cex=0.6,mar=c(1,1,1,1))
-```
-
-**Without transformations**
-
-Initially we attempted stepwise regression for the data set without any transformations. Despite using both AIC and BIC, we had issues with there being too many parameters (10-12 parameters) and this meant that the model was not simple. As a result we chose to apply the transformations and see if that gave better results.
-
-**With transformations**
-
-First we apply the transformations and create a separate transformed dataset, then we define the bounds of the complexity of our model. Then we do the same as above and perform stepwise regression on this dataset using both AIC and BIC.
-
-**AIC**
-
-We first attempted to use AIC but this returned a model with 9 variables in it as well as an intercept term. Despite the fact this model is a good explanation of the data, it is far from simple and would be difficult to interpret properly. As a result we opted to go forward using BIC as this gave a heavier penalty for having more variables.
+We first attempted to use AIC but this returned a model with 9 variables in it as well as an intercept term. Despite the fact this model is a good explanation of the data, it is far from simple and would be more difficult to interpret properly. As a result we opted to go forward using BIC as this gave a heavier penalty for having more variables.
 
 ```{r Define null and full models, include=FALSE}
 fullTransModel=lm(deathRate ~ Edu18_24 + medIncome + PctMarriedHouseholds + 
@@ -442,7 +426,7 @@ AICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel))
 ols_coll_diag(AICmodel1)
 ```
 
-**BIC**
+**BIC Stepwise Regression**
 
 ```{r BIC Stepwise 1, include=FALSE}
 BICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3040))
@@ -450,7 +434,7 @@ ols_coll_diag(BICmodel1)
 summary(BICmodel1)
 ```
 
-Our first model for the BIC stepwise regression model had 6 variables in it which is a much easier to interpret than what the AIC suggested. However, there were issues with collinearity here with a condition number of 265. This is too high to be able to justify using this model and so we looked to find which variables were problematic. The model suggested that it was the median income and the intercept term. We initially thought that having an intercept term may not be the best approach going forward and so we removed it at this point.
+Our first model for the BIC stepwise regression model had 6 variables in it which is a much easier to interpret than what the AIC suggested. However, the condition number was 265. This means that two of the rows in the condition matrix are near to liner combinations of each other and so we have an issue with collinearity. The output suggested that it was the median income and the intercept term. We initially thought that having an intercept term may not be the best approach going forward and so we removed it at this point.
 
 ```{r BIC Stepwise 2, include=FALSE}
 fullTransModel=lm(deathRate ~ 0 + Edu18_24 + medIncome + PctMarriedHouseholds + 
@@ -465,7 +449,7 @@ ols_coll_diag(BICmodel2)
 summary(BICmodel2)
 ```
 
-Once we had removed the intercept term we found that there were still collinearity issues but this time it was between the median income, education coefficient and regions. Median income appeared to us to be a common theme and there was also the poverty percent which was not being used, which is also a measure of wealth, so there were alternatives. As a result we removed median income from our full model and looked at if the collinearity was solved then.
+Despite removing the intercept term, there were still collinearity issues between the median income, education coefficient and regions. Median income appeared to be a common theme and there were alternative measures of wealth available. As a result we removed median income from our full model and looked at if the collinearity was solved then.
 
 ```{r BIC Stepwise 3, include=FALSE}
 fullTransModel=lm(deathRate ~ 0 + Edu18_24 + PctMarriedHouseholds + 
@@ -479,7 +463,7 @@ ols_coll_diag(BICmodel3)
 summary(BICmodel3)
 ```
 
-While the condition number had decreased significantly, it was still 65, which is too large. At this point the problematic variables were the regions, percentage of married households and the education coefficient. The education coefficient and regions were an issue before as well so we decided one of them was best to remove form the full model. We decided that, of the two, we would remove the regions since if a region generally has a higher death rate then it usually has a higher incidence rate too and so part of the region variable is explained by the incidence rate. As a result, we removed the regions from our full model and repeated the stepwise regression again.
+The condition number decreased but was still 65, which is too large. At this point the problematic variables were the regions, percentage of married households and the education coefficient. We decided that we would remove the regions since if a region has a higher death rate then this is usually captured by a higher incidence rate. As a result, we removed the regions from our full model and repeated the stepwise regression again.
 
 ```{r BIC Stepwise 4, include=FALSE}
 fullTransModel=lm(deathRate ~ 0 + Edu18_24 + PctMarriedHouseholds + 
@@ -506,7 +490,7 @@ for (i in (1:4)) {
 }
 ```
 
-From these graphs we can see that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the resdiuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3040 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting it as an outlier.
+From these graphs we can see that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the resdiuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3040 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
 
 **Cross validation**
 

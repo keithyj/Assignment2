@@ -524,7 +524,7 @@ The adjusted R Squared value was (fill)
 The variance inflation factor for the variables included did not exceed 2, suggesting no issuees with multicolinearity. 
 Residuals are homoscedastic and uncorrelated. However the residuals did not demonstrate a normal distribution. 
 
-```{r Model Table, eval = FALSE}
+```{r, eval = FALSE}
 cancerLASSO <- cancer5[,-c(1,2,17)]
 
 cancerLASSO <- model.matrix(~., data = cancerLASSO)
@@ -541,7 +541,7 @@ LASSOresiduals <- cancer3$deathRate - LASSOpredicted
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer3$deathRate - mean(cancer3$deathRate))^2))
 ```
 
-```{r, echo = FALSE}
+```{r Model Table, echo = FALSE}
 library(sylly)
 name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
        'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
@@ -551,6 +551,17 @@ rownames(modelTable)=name
 colnames(modelTable)=c('Parameter estimate')
 pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
 ```
+
+```{r, echo = FALSE}
+par(mfrow = c(1,1))
+bin <- scale(LASSOresiduals)
+bin1 <- which(bin < 0)
+bin[bin1] <- -bin[bin1]
+plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals")
+plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals")
+```
+
+
 
 ## Ridge Regression
 Due to multicollinearity existing in the model we will perform a ridge regression, this will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 

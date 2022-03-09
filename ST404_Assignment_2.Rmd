@@ -197,7 +197,7 @@ cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSi
 #removing PctEmployed16_Over and binnedInc from the dataset used for modelling.
 cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 ```
-We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions (United States Census Bureau, 2010). These regions are Northeast, Midwest, South and West.
+We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions [Divisions]. These regions are Northeast, Midwest, South and West.
 
 ``` {r region variable, include=FALSE}
 #Split Geography into county and state
@@ -386,7 +386,7 @@ library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
 ```
-This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which we used as the cut off echoing Liao et al (2012), is PctEmpPrivCoverage when condition index is 45.36. When the condition index is 48, PctPublicCoverage is an issue. When the condition index is 78 PctPrivateCoverage and Edu19_24 are issues. When the condition index is 123, issues lie with MedianAgeMale and Female. When condition index is 159, issues lie with AvgHouseholdSize, PctMarried and PctMarriedHouseholds. When condition index is 262, the issues are with when condition index is 262.44: incidenceRate is an issue. povertyPercent, intercept and medIncome when the condition index is 547.2. 
+This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30 and the variance decomposition proportion above 0.3, which we used as the cut off, is PctEmpPrivCoverage when the condition index (CI) is 45.36 [ConditionIndex]. When the CI is 48, 78, 123,PctPublicCoverage is an issue. When the condition index is 78 PctPrivateCoverage and Edu19_24 are issues. When the condition index is 123, issues lie with MedianAgeMale and Female. When condition index is 159, issues lie with AvgHouseholdSize, PctMarried and PctMarriedHouseholds. When condition index is 262, the issues are with when condition index is 262.44: incidenceRate is an issue. povertyPercent, intercept and medIncome when the condition index is 547.2. 
 
 We can see that the variables that show, to some degree, multicollinearity are: povertyPercent and medIncome, AvgHouseholdSize, PercentMarried and PctMarriedHouseholds, MedianAgeMale and MedianAgeFemale, and PctPrivateCoverage and Edu19_24.
 
@@ -591,22 +591,11 @@ One limitation of this data is that the populations in each county are different
 
 \pagebreak
 
+# \underline{References}
 
+<div id="refs"></div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\pagebreak
 
 # Appendix
 
@@ -665,10 +654,3 @@ boxcox <- function(x, p){
   } 
 }
 ```
-
-# References
-
-United States Census Bureau. 2010. *United States Census Bureau*. [Online]. [Accessed 8th March 2022]. Available from: https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
-
-Liao D, Valliant R. 2012. Condition indexes and variance decompositions for diagnosing collinearity in linear model analysis of survey data. *Survey Methodology*. **38**(2),pp.189–202.
-

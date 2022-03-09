@@ -668,7 +668,7 @@ boxcox <- function(x, p){
 }
 ```
 
-#References
+# References
 
 United States Census Bureau. 2010. *United States Census Bureau*. [Online]. [Accessed 8th March 2022]. Available from: https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
 

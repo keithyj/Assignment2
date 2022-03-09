@@ -42,17 +42,13 @@ All statements made in our findings are supported in our statistical methodology
 
 ## Data Cleaning
 
-Based on our previous EDA showing 152 missing observations in PctEmployed16_Over, and a high correlation between this variable and PctUnemployed16_Over, we decided to remove the PctEmployed16_Over column and ignore this for our analysis. This decision was favoured over removing the missing observation rows from the dataset as even though the dataset is large, it still contributes to more accurate analysis of the other variables. We also decided to scale the infeasibly small observations of AvgHouseholdSize (those less than 0.1) by 100. In order to account for different death rates found in different states within the US, we divided the US into 4 regions and allocated each county into one of these 4 regions. This variable, named 'Region' will then be used to construct a model.
-
-Several counties were identified as having very large leverage and are therefore likely to have a larger influence on variable coefficients in the model. It is not desirable to have such a small number of counties to have such a large impact on the model since we want the bulk of the counties to influence our future predictions and form our analysis of the causes of higher cancer death rates. Therefore, these counties have been removed. The counties are (....??).
+Based on our previous EDA showing 152 missing observations in PctEmployed16_Over, and a high correlation between this variable and PctUnemployed16_Over, we decided to remove the PctEmployed16_Over column and ignore this for our analysis. This decision was favoured over removing the missing observation rows from the dataset as even though the dataset is large, it still contributes to more accurate analysis of the other variables. We also decided to scale the infeasibly small observations of AvgHouseholdSize (those less than 0.1) by 100. In order to account for different death rates found in different states within the US, we divided the US into 4 regions and allocated each county into one of these 4 regions. This variable, named 'Region' will then be used to construct a model. We noticed that medIncome and binnedInc are similar metrics and so we removed binnedInc from the data before we conducted any analysis. This is beacuase binnedInc is given as an interval for each county and so is not feasible to be directly used in the model.   
 
 ## Multicollinearity
 
 What to still mention:
 
 * The multicollinearity shown in statistical methodology
-
-We noticed that medIncome and binnedInc represent the same force and so we removed binnedInc from the data before we conducted any analysis.  
 
 ## Transformations
 

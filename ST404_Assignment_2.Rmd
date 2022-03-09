@@ -46,9 +46,14 @@ Based on our previous EDA showing 152 missing observations in PctEmployed16_Over
 
 ## Multicollinearity
 
-What to still mention:
+In the plot a large square and darker colour indicates a stronger correlation and red indicates this correlation is negative while blue indicates positive correlation. We notice clusters of correlation between median income and poverty with each other, marriage and type of insurance cover; median age variables with average household sizes; employment statistics with type of insurance cover; marriage statistics with percent of black population.
 
-* The multicollinearity shown in statistical methodology
+```{r, echo=FALSE, out.height='75%', out.width='75%', fig.cap="Spearman's correlation matrix plot"}
+correlations1 <- cor(cancerRaw[,c(2,3,5:9,11:18)],method='spearman')
+corrplot(correlations1,method='square',title='Spearman Correlation plot', tl.col="black", tl.cex=0.6,mar=c(1,1,1,1))
+```
+
+Furthermore we noticed that medIncome and binnedInc represent the same force and so we removed binnedInc from the data before we conducted any analysis.  
 
 ## Transformations
 

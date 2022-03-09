@@ -49,8 +49,6 @@ Based on our previous EDA showing 152 missing observations in PctEmployed16_Over
 
 We notice multicollinearity between medIncome and percentPoverty, marriage and types of insurance cover; median age variables with AvgHouseholdSize; employment statistics with type of insurance cover; marriage statistics with PctBlack. 
 
-Furthermore we noticed that medIncome and binnedInc represent the same force and so we removed binnedInc from the data before we conducted any analysis.  
-
 ## Transformations
 
 Some transformations of the variables were completed in order to fulfil the model assumptions, mainly homoscesastiscity (constant variance of errors) and linearity. Transformations were kept to a minimum in order to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are: power transform incidenceRate and PctUnemployed16_Over as follows incidenceRate^1.5 and sqrt(PctUnemployed16_Over), also log transform PctBlack and medIncome.
@@ -58,6 +56,7 @@ Some transformations of the variables were completed in order to fulfil the mode
 ## Outliers and Influencial Observations
 
 Several observations were identified as having a high leverage and after testing for influencial observations we declared that the following observations would be removed from the data to ensure the model was not impacted by outliers.
+
 \tiny
 ```{r Outlier Table, echo=FALSE}
 names=c('Williamsburg City','Union County','Aleutians West Census Area','De Baca County','North Slope Borough','Chattahoochee County')

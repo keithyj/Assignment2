@@ -516,6 +516,9 @@ bin[bin1] <- -bin[bin1]
 plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals",cex=0.5)
 plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
 ```
+This model also returns an R squared value of 0.4849. This model also had a mean squared error of 389.4. These all suggest a strong predictive power. Furthermore all the variables, with the exception of median income, which we included in our original model remained. This suggests this model has a strong explanatory power. 
+We also computed the variance inflation factors which returned a VIF no higher than 2 for each variable suggesting no issues with multicollinearity.
+
 
 
 ## Ridge Regression

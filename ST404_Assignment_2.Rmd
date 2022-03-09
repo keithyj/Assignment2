@@ -492,6 +492,11 @@ LASSOresiduals <- cancer5$deathRate - LASSOpredicted
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
 ```
 
+In order to use the functions in the package glmnet with our data we needed to do two things:
+1.	Put our data into a matrix
+2.	Have the region variable split into three variables (since there are four regions)
+
+Using the transformations rearranging of our data stated above we first run an LAR algorithm to obtain the following coefficents which are plotted against the penalty parameter, lambda. We slso include the value of lambda corresponding to the coeficents minimising the mean squared error. However this lambda shrinks none of the parameters to zero. This model would be very difficult to interpret and so we instead opt to use the value of lambda which is one standard error away. These values of lambda were subject to change when using the cross validation function found in glmnet, so we set a seed of six when building our model in the interest of reproducibility.
 
 ```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%'} 
 par(mfrow = c(1,1))
@@ -500,7 +505,10 @@ abline(v = log(cvLASSO$lambda.min), col = "blue")
 abline(v = log(cvLASSO$lambda.1se), col = "red")
 legend("bottomleft",legend=c("Minimum lambda", "1 standard error larger lambda"),lty=c(1,1),col=c("blue","red"), ins=0.05, bty = "n")
 ```
+The model we get from this has the coefficents as seen in the findings section. 
 
+**Model Diagnostics**
+The residuals vs fitted plot suggests our model is nicely linear and the scale-location plot suggests homoscedastic residuals.  
 ```{r, echo = FALSE, fig.width=9 , fig.height=2.25}
 par(mfrow = c(1,2),mar=c(1.8, 4.4, 1.8, 1.9))
 bin <- scale(LASSOresiduals)
@@ -509,6 +517,7 @@ bin[bin1] <- -bin[bin1]
 plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals",cex=0.5)
 plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
 ```
+
 
 ## Ridge Regression
 Due to multicollinearity existing in the model we will perform a ridge regression, this will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 

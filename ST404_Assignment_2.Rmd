@@ -58,7 +58,6 @@ Some transformations of the variables were completed in order to fulfil the mode
 ## Outliers and Influencial Observations
 
 Several observations were identified as having a high leverage and after testing for influencial observations we declared that the following observations would be removed from the data to ensure the model was not impacted by outliers.
-
 \tiny
 ```{r Outlier Table, echo=FALSE}
 names=c('Williamsburg City','Union County','Aleutians West Census Area','De Baca County','North Slope Borough','Chattahoochee County')
@@ -76,10 +75,10 @@ We looked for a model that had the following characteristics: simplicity, explan
 
 ### Stepwise selection
 
-There were issues with collinearity using this method, meaning lots of varibiables were removed. The model suggested by stepwise regression is shown below.
+There were issues with collinearity using this method, meaning lots of variables were removed. The model suggested by stepwise regression is shown below.
 
 \tiny
-```{r Model Table, echo=FALSE}
+```{r Model Table Step, echo=FALSE,message=FALSE}
 library(sylly)
 name=c('incidenceRate','povertyPercent','PctUnemploy16_Over',
        'PctPublicCoverage','PctBlack','PercentMarried')
@@ -132,18 +131,7 @@ LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
 LASSOresiduals <- cancer5$deathRate - LASSOpredicted
 
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
-```
 
-
-```{r Model Table, echo = FALSE}
-library(sylly)
-name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
-       'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
-beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
-rownames(modelTable)=name
-colnames(modelTable)=c('Parameter estimate')
-pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
 ```
 
 ### Ridge Regression
@@ -191,7 +179,7 @@ plot(model)
  
 We look for outliers within our model, as well as seeing if the counties we removed for having high leverage initially conform to our model and therefore to the general pattern. 
 
-
+\pagebreak
 
 # Statistical Methodology
 
@@ -265,19 +253,15 @@ We test the null hypothesis that there is no linear association between deathRat
 We will assess the adequacy of the model by checking if the functional form of the model is correct. We will look at the following plots to assess this:
 
 
-``` {r, echo = FALSE, eval = TRUE}
-# Identify any heteroscedascity and non-linearity
+``` {r, echo = FALSE, eval = TRUE,fig.height=1.8,fig.width=6}
+# Identify any heteroscedasticity and non-linearity
+par(mar=c(1, 4.4, 1, 1.9))
 par(mfrow=c(1,2))
 plot(Model0, 1)
-plot(Model0, 2)
+plot(Model0, 3)
 ```
 
-We can see from the plots that there exists heteroscedascity and non-linearity. We also notice from our intitial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. We do this by using Box-Cox and observations after trialling log transformations. We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations:
-
-* log(PctBlack$+0.1$)
-* incidenceRate^1.5
-* sqrt(PctUnemployed16_Over)
-* log(medIncome)
+We can see from the plots that there exists heteroscedasticity and non-linearity. We also notice from our initial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. We do this by using Box-Cox and observations after trialling log transformations. We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations: $log$(PctBlack$+0.1$), incidenceRate^1.5^, PctUnemployed16_Over^0.5^ and  $log$(medIncome).
 
 ```{r, include=FALSE}
 #Box cox Power transformation UDF
@@ -295,7 +279,7 @@ boxcox <- function(x, p){
 # Declare new dataframe from old
 cancer5=cancer
 #Scaling PctBlack 
-cancer5$PctBlack=(cancer5$PctBlack) + 0.1
+cancer5$PctBlack=cancer5$PctBlack + 0.1
 # Transformations
 cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
 cancer5$medIncome=log(cancer5$medIncome)
@@ -304,23 +288,29 @@ cancer5$PctBlack=log(cancer5$PctBlack)
 
 ```
 
-``` {r checkingassumptions, echo = FALSE, eval = TRUE}
+``` {r checkingassumptions print, include = FALSE, eval = TRUE}
 #Check for any updated heteroscedascity and linearity
-par(mfrow=c(2,2))
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 1)
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 3)
 plot(lm(deathRate ~ medIncome, data = cancer5), 1)
 plot(lm(deathRate ~ medIncome, data = cancer5), 3)
+```
+
+
+``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%'}
+par(mar=c(1.8, 4.4, 2, 1.8))
+par(mfrow=c(2,2))
 plot(lm(deathRate ~ PctBlack, data = cancer5), 1)
 plot(lm(deathRate ~ PctBlack, data = cancer5), 3)
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1)
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3)
 ```
 
-These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables.
+These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This could be due to influencial outliers.
 
-``` {r adequacy2, echo = FALSE, eval = TRUE}
-# Creating updated model with transformed variables.
+``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6}
+# Creating updated model with transformed variables
+par(mar=c(1.2, 4.4, 1.2, 1.9))
 Model1 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer5)
 
 # Identify any heteroscedascity and non-linearity 
@@ -328,7 +318,7 @@ par(mfrow=c(1,2))
 plot(Model1, 1)
 plot(Model1, 3)
 ```
-The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This could be due to influencial outliers.
+
 
 #### Outliers  
 
@@ -397,9 +387,9 @@ library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
 ```
-This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which we used as the cut off echoing Liao et al (2012), is PctEmpPrivCoverage and Edu18_24 when condition index is 45.92. When the condition index is 50.24, PctPublicCoverage is an issue. When the condition index is 80.46, PctPrivateCoverage and Edu19_24 are issues. When the condition index is 101.87, issues lie with PercentMarried and PctMarriedHouseholds. When condition index is 124.7, issues lie with MedianAgeMale & Female. When condition index is 174.74, the issues are with AvgHouseholdSize, PercentMarried and PctMarriedHouseholds. When condition index is 679.76: the intercept, medIncome, and povertyPercent presents an issue.
+This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which we used as the cut off echoing Liao et al (2012), is PctEmpPrivCoverage when condition index is 45.36. When the condition index is 48, PctPublicCoverage is an issue. When the condition index is 78 PctPrivateCoverage and Edu19_24 are issues. When the condition index is 123, issues lie with MedianAgeMale and Female. When condition index is 159, issues lie with AvgHouseholdSize, PctMarried and PctMarriedHouseholds. When condition index is 262, the issues are with when condition index is 262.44: incidenceRate is an issue. povertyPercent, intercept and medIncome when the condition index is 547.2. 
 
-We can see that the variables that show, to some degree, multicollinearity are (in order of significance): povertyPercent and medIncome; AvgHouseholdSize, PercentMarried and PctMarriedHouseholds; MedianAgeMale and MedianAgeFemale; PercentMarried and PctMarried Households, PctPrivateCoverage and Edu18_24; PctPublicCoverage and Edu18_24; and lastly PctEmpPrivCoverage and Edu18_24.
+We can see that the variables that show, to some degree, multicollinearity are: povertyPercent and medIncome, AvgHouseholdSize, PercentMarried and PctMarriedHouseholds, MedianAgeMale and MedianAgeFemale, and PctPrivateCoverage and Edu19_24.
 
 ```{r, include=FALSE}
 #defining boxcox function
@@ -493,21 +483,21 @@ After analysing the condition numbers and the VIFs from this model we were able 
 
 **Check Model Assumptions**
 
-The model produces the following plots:
+The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3040 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
 
-```{r Check Assumptions, echo=FALSE}
+```{r Check Assumptions, echo=FALSE,out.height='70%',out.width='70%'}
+par(mar=c(1.5, 4.4, 2, 1.5))
 par(mfrow=c(2,2))
 for (i in (1:4)) {
   plot(BICmodel4,i)
 }
 ```
 
-From these graphs we can see that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the resdiuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3040 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
-
 **Cross validation**
 
 To determine how well the model predicts values we use leave one out cross validation (LOOCV). This is included in the package `caret`. We ran this on the model suggested by BIC stepwise regression and the summary is given in the table below.
 
+\tiny
 ```{r Cross validation, echo=FALSE}
 crossVal=as.table(matrix(data=c(20.98,0.4176,16.09),nrow=1,ncol=3,byrow = TRUE))
 rownames(crossVal)=c('BIC stepwise model')
@@ -516,7 +506,7 @@ knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC st
 ```
 
 ## LASSO
-
+\normalsize
 Note: might want to say ran an LAR algorithim here, I think that might be what it is called.
 
 Running a LASSO on our data with transformation as outlined above. By using cross validation we get the value of lambda minimising the mean squared error as (fill). However as illustrated in figure ? we can see that this value of lambda includes all coeficents in our model. This would make our model difficult to interpret so we instead consider the value of lambda which is 1se away (fill). Using this more strict restriction term shrinks the following variables to zero: (fill). 
@@ -535,34 +525,37 @@ The adjusted R Squared value was (fill)
 The variance inflation factor for the variables included did not exceed 2, suggesting no issuees with multicolinearity. 
 Residuals are homoscedastic and uncorrelated. However the residuals did not demonstrate a normal distribution. 
 
-```{r, eval = FALSE}
+```{r, include = FALSE}
 cancerLASSO <- cancer5[,-c(1,2,17)]
-
 cancerLASSO <- model.matrix(~., data = cancerLASSO)
-
-LASSO <- glmnet(cancerLASSO, cancer3$deathRate, alpha = 1) 
+LASSO <- glmnet(cancerLASSO, cancer5$deathRate, alpha = 1) 
 set.seed(6)
-cvLASSO <- cv.glmnet(cancerLASSO, cancer3$deathRate, alpha = 1)
-LASSOmodel <- glmnet(cancerLASSO, cancer3$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
-
-
+cvLASSO <- cv.glmnet(cancerLASSO, cancer5$deathRate, alpha = 1)
+LASSOmodel <- glmnet(cancerLASSO, cancer5$deathRate, alpha = 1, lambda = cvLASSO$lambda.1se)
 LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
-LASSOresiduals <- cancer3$deathRate - LASSOpredicted
-
-LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer3$deathRate - mean(cancer3$deathRate))^2))
+LASSOresiduals <- cancer5$deathRate - LASSOpredicted
+LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
 ```
-alsdfkjkdfjklajdfkljaskdfjkadjfkjakdjfkajdkfadsjflkajdsfjksajksjkfjlsdfkljdkfjsdfkljsdkfksdjfklajsdfjajsdfjkldjfljdsajfksjkldjjasljlfjasdakjsdnfadsklfjdjsfkjaskfjd
+
+```{r Model Table LASSO, echo = FALSE}
+library(sylly)
+name=c('incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
+       'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
+beta=c('0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
+modelTable=as.table(matrix(data=c(beta),nrow=9,ncol=1))
+rownames(modelTable)=name
+colnames(modelTable)=c('Parameter estimate')
+pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
+```
 
 ```{r, echo = FALSE}
-par(mfrow = c(2,1), mar = c(1.8,4.4,2,1.8))
+par(mfrow = c(1,1))
 bin <- scale(LASSOresiduals)
 bin1 <- which(bin < 0)
 bin[bin1] <- -bin[bin1]
-plot(LASSOpredicted, sqrt(bin), main = "Scale Location For LASSO model", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals")
+plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals")
 plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals")
 ```
-
-
 
 ## Ridge Regression
 Due to multicollinearity existing in the model we will perform a ridge regression, this will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 
@@ -597,7 +590,7 @@ The Ridge regression produces a linear model with an R^2 value of 0.484, and a m
 
 One limitation of this data is that the populations in each county are different. However, our model puts equal weighting on each county. To gain a more realistic model, perhaps it would be valuable to give different weightings to counties depending on their population.
 
-
+\pagebreak
 
 
 
@@ -676,9 +669,7 @@ boxcox <- function(x, p){
 
 # References
 
-Liao D, Valliant R. 2012. Condition indexes and variance decompositions for diagnosing collinearity in linear model analysis of survey data. *Survey Methodology*. **38**(2),pp.189–202.
-
 United States Census Bureau. 2010. *United States Census Bureau*. [Online]. [Accessed 8th March 2022]. Available from: https://www2.census.gov/geo/pdfs/maps-data/maps/reference/us_regdiv.pdf
 
-
+Liao D, Valliant R. 2012. Condition indexes and variance decompositions for diagnosing collinearity in linear model analysis of survey data. *Survey Methodology*. **38**(2),pp.189–202.
 

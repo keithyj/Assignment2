@@ -94,7 +94,7 @@ colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
 ### LASSO regression
 \normalsize
 
-Using LASSO variable selection we create a model which includes eight predictor variables including: those in the table below. We expected this as the scatter plots and summary of our initial model suggested they are significant with respect to death rate. with the exception of medIncome. The coefficients for each of these variables are as follows.
+Using LASSO variable selection we create a model which includes eight predictor variables including: those in the table below. We expected this as the scatter plots and summary of our initial model suggested they are significant with respect to death rate. with the exception of medIncome. We found this model to have good predictive power. The coefficients for each of these variables are as follows.
 \tiny
 ```{r Model Table LASSO, echo = FALSE}
 library(sylly)
@@ -106,6 +106,8 @@ rownames(modelTable)=name
 colnames(modelTable)=c('Parameter estimate')
 pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
 ```
+
+
 
 ### Ridge Regression
 \normalsize
@@ -477,24 +479,6 @@ knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC st
 
 ## LASSO
 \normalsize
-Note: might want to say ran an LAR algorithim here, I think that might be what it is called.
-
-Running a LASSO on our data with transformation as outlined above. By using cross validation we get the value of lambda minimising the mean squared error as (fill). However as illustrated in figure ? we can see that this value of lambda includes all coeficents in our model. This would make our model difficult to interpret so we instead consider the value of lambda which is 1se away (fill). Using this more strict restriction term shrinks the following variables to zero: (fill). 
-
-By using LASSO variable selection we construct a model with eight predictor variables which allign with those we expected from our intial EDA. The variables we have are
-
-### Put the coefficents plot here with abline used for the values of lambda also include a legend ###
-
-
----Extending the LASSO---
-In attempting to extend our existing LASSO model we first included interaction terms for variables with high correlation. This included (fill). However by including these variables we ran into more issues with the variables being selected. Therefore we chose to omit the inclusion of interaction terms. With respect to higher order terms we found that the only quadratic terms being included would shrink their linear ocunterpart to zero. Therefore we also decided to omit higher order terms for independent variables from the model.
-
----Evaluating the goodness of this model--- 
-The R squared value for this model was (fill).
-The adjusted R Squared value was (fill)
-The variance inflation factor for the variables included did not exceed 2, suggesting no issuees with multicolinearity. 
-Residuals are homoscedastic and uncorrelated. However the residuals did not demonstrate a normal distribution. 
-
 
 ```{r, include = FALSE}
 cancerLASSO <- cancer5[,-c(1,2,17)]

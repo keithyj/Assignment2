@@ -79,12 +79,12 @@ There were issues with collinearity using this method, meaning lots of variables
 \tiny
 ```{r Model Table Step, echo=FALSE,message=FALSE}
 library(sylly)
-name=c('incidenceRate','povertyPercent','PctUnemploy16_Over',
+name=c('incidenceRate','povertyPercent','PctUnemployed16_ Over',
        'PctPublicCoverage','PctBlack','PercentMarried')
-transformation=c('incidenceRate^(1.5)','None','PctUnemploy16_Over^(0.5)','None','log(PctBlack+0.1)',
+transformation=c('incidenceRate^(1.5)','None','PctUnemployed16_Over^(0.5)','None','log(PctBlack+0.1)',
                 'None')
 beta=c('0.00768','1.53','4.71','0.556','2.02','0.858')
-interpretation=c("If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero", "If poverty percent increases by 1, death rate increases by 1.53, assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero", "If percent public coverage increases by 1, death rate increases by 0.556, assuming all other variables remain constant", "This variable is a little harder to interpret. If (percent black + 1) increases by a factor of x, death rate will increase by 2.02log(x), assuming all other variables remain constant", "If percent married increases by 1, death rate increases by 0.858, assuming all other variables remain constant")
+interpretation=c("If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.00768 assuming all other variables remain constant.", "If poverty percent increases by 1, death rate increases by 1.53, assuming all other variables remain constant.", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 4.71 assuming all other variables remain constant.", "If percent public coverage increases by 1, death rate increases by 0.556, assuming all other variables remain constant.", "If (percent black + 1) increases by a factor of x, death rate will increase by 2.02log(x), assuming all other variables remain constant.", "If percent married increases by 1, death rate increases by 0.858, assuming all other variables remain constant.")
 modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=6,ncol=3))
 rownames(modelTable)=name
 colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')

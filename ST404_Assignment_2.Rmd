@@ -388,7 +388,7 @@ ols_coll_diag(Model3)
 ```
 This shows that PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5. When looking at the condition index's above 30, the variance decomposition proportion above 0.3, which we used as the cut off echoing Liao et al (2012), is PctEmpPrivCoverage and Edu18_24 when condition index is 45.92. When the condition index is 50.24, PctPublicCoverage is an issue. When the condition index is 80.46, PctPrivateCoverage and Edu19_24 are issues. When the condition index is 101.87, issues lie with PercentMarried and PctMarriedHouseholds. When condition index is 124.7, issues lie with MedianAgeMale & Female. When condition index is 174.74, the issues are with AvgHouseholdSize, PercentMarried and PctMarriedHouseholds. When condition index is 679.76: the intercept, medIncome, and povertyPercent presents an issue.
 
-We can see that the variables that show, to some degree, multicollinearity are: povertyPercent and medIncome, AvgHouseholdSize, PercentMarried and PctMarriedHouseholds, MedianAgeMale and MedianAgeFemale, and PctPrivateCoverage and Edu19_24.
+We can see that the variables that show, to some degree, multicollinearity are (in order of significance): povertyPercent and medIncome; AvgHouseholdSize, PercentMarried and PctMarriedHouseholds; MedianAgeMale and MedianAgeFemale; PercentMarried and PctMarried Households, PctPrivateCoverage and Edu18_24; PctPublicCoverage and Edu18_24; and lastly PctEmpPrivCoverage and Edu18_24.
 
 ```{r, include=FALSE}
 #defining boxcox function

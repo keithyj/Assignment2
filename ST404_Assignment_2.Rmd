@@ -188,7 +188,7 @@ We look for outliers within our model, as well as seeing if the counties we remo
 Our findings are based off the preliminary EDA of the US Cancer Dataset.
 
 ## Tidying the Data
-### Missing Values
+
 As declared in the EDA, missing values exist in PctEmployed16_Over and extremely low values exist in AvgHouseholdSize. Many, 152, PctEmplyed16_Over observations are missing. We could fill in the missing values by predicting them using a linear model created by the other variables. However, the variable PctUnemployed16_Over is strongly negatively correlated with PctEmployed16_Over. Therefore, we choose to remove PctEmployed16_Over entirely to avoid collinearity with PctUnemployed16_Over, and to avoid increasing the variance of the model by performing further predictions of the missing values. We will also scale the values of AvgHouseholdSize between 0 and 0.1 by 100.
 
 ``` {r ScaleColumn, include = FALSE}

@@ -79,23 +79,11 @@ We looked for a model that had the following characteristics: simplicity, explan
 
 ### Stepwise selection
 
-\tiny
-```{r Model Table Step, echo=FALSE,message=FALSE,warning=FALSE}
-library(sylly)
-name=c('incidenceRate','povertyPercent','PctUnemployed16_ Over',
-       'PctPublicCoverage','PctBlack','PercentMarried')
-transformation=c('(incidenceRate^(1.5)-1)/1.5','None','(PctUnemployed16_Over^(0.5)-1)/0.5','None','log(PctBlack+0.1)',
-                'None')
-beta=c('0.00768','1.53','4.71','0.556','2.02','0.858')
-interpretation=c("If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5 with a small error due to the boxcox transform, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.00512 assuming all other variables remain constant.", "If poverty percent increases by 1, death rate increases by 1.53, assuming all other variables remain constant.", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5 with a small error due to the boxcox transform, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 9.42 assuming all other variables remain constant.", "If percent public coverage increases by 1, death rate increases by 0.556, assuming all other variables remain constant.", "If (percent black + 0.1) increases by a factor of x, death rate will increase by 2.02log(x), assuming all other variables remain constant.", "If percent married increases by 1, death rate increases by 0.858, assuming all other variables remain constant.")
-modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=6,ncol=3))
-rownames(modelTable)=name
-colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
-  pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left", "right", "right", "center"), use.hyphening = TRUE)
+There were issues with collinearity using this method, meaning variables were removed incrementally until a suitabl moddel was found. The final model found from stepwsie variable selection is presented below.
+```{=Latex}
+$deathRate=0.08\frac{incidenceRate^{1.5}-1}{1.5}-1.53povertyPercent+4.71\frac{PctUnemployed16\_Over^{0.5}-1}{0.5}+0.556PctPublicCoverage+2.02\log(PctBlack+0.1)+0.858PercentMarried$
 ```
-
-\normalsize
-There were issues with collinearity using this method, meaning lots of variables were removed. The model suggested by stepwise regression is shown above.
+This model was compared with the LASSO model below, and the LASSO model was preferred due to its superior predictive and explanatory power.
 
 ### LASSO regression
 

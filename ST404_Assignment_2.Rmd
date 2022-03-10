@@ -175,8 +175,6 @@ cancer$Region <-  factor(cancer$Region)
 Lastly, we choose to ignore binnedInc in our modelling process as it represents the same force as medIncome.
 
 ## Modelling
-We observe the scatter plots of the individual variables against deathRate and fit an initial model based on these, as seen in previous EDA. 
-
 ``` {r redundancy, include = FALSE}
 # Look at scatter plots and identify any relationships between deathRate.
 par(mfrow = c(2,3))
@@ -196,9 +194,9 @@ with(cancer, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab =
 with(cancer, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
 with(cancer, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
-The variables we will include in the initial model are those that show a relationship with deathRate. From the scatter plots we can observe that most variables show some type of relationship with deathRate. However, it is not clear to see whether any do not. For now, we will assume all predictor variables do and keep them in the model, especially as we have not yet tested for multicollinearity which could affect the model. We will soon do an analysis of variance to check the significance of the relationships between predictors and deathRate.
+The variables we will include in the initial model are those that show a relationship with deathRate. From our initial EDA we can observe that most variables show some type of relationship with deathRate. However, it is not clear to see whether any do not. For now, we will assume all predictor variables do and keep them in the model, especially as we have not yet tested for multicollinearity which could affect the model. We will soon do an analysis of variance to check the significance of the relationships between predictors and deathRate.
 
-``` {r adequacy, echo = FALSE}
+``` {r adequacy, include = FALSE}
 # Creating a linear model with all variables from the current dataset
 Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
 ```
@@ -246,19 +244,19 @@ plot(lm(deathRate ~ incidenceRate, data = cancer5), 1)
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 3)
 plot(lm(deathRate ~ medIncome, data = cancer5), 1)
 plot(lm(deathRate ~ medIncome, data = cancer5), 3)
+plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5)
+plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5)
 ```
 
 
-``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%', fig.cap = "Showing the improved linearity and homoscedasticity of PctBlack and PctUnemployed16Over"}
+``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%', fig.cap = "Showing the improved linearity and homoscedasticity of PctUnemployed16Over"}
 par(mar=c(1.8, 4.4, 2, 1.8))
-par(mfrow=c(2,2))
-plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5,main="log(PctBlack) Residuals Fitted")
-plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5,main="log(PctBlack) Scale location")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctUnemployed16^0.5 Residuals Fitted")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemployed16^0.5 Scale location")
+par(mfrow=c(1,2))
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5)
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5)
 ```
 
-These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The two transformed variables that are not shown here are in the appendix. After transforming the varibales, we check the model assumptions for this updated model and notice the model assumptions are being violated, this could be due to influencial outliers.
+These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The three transformed variables that are not shown here are in the appendix. After transforming the varibales, we check the model assumptions for this updated model and notice the model assumptions are being violated, this could be due to influencial outliers - so we will check this.
 
 ``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6, fig.cap = "The updated model shows signs of linearity and reduced heteroscedasticity"}
 # Creating updated model with transformed variables
@@ -285,7 +283,7 @@ ols_plot_dfbetas(Model1)
 # This plot shows that the observations 2682, 282, 166, 2727, and 2714 all have a DFBETA > 0.4.
 ```
 
-We declare the following observations to be influencial and we will remove these from our dataset: 2682, 282, 166, 2727, 1490 and 2714. We investigated the nature of these observation's influence further, our research reinforced our decision to remove as for example Union County, Florida is a county where prisoners with lung cancer are sent. **Need reference**.
+We declare the following observations to be influencial and we will remove these from our dataset: 2682, 282, 166, 2727, 1490 and 2714. We investigated the nature of these observation's influence further, our research reinforced our decision to remove as for example Union County, Florida is a county where prisoners with lung cancer are sent (@Outliers).
 
 ``` {r removeoutliers, include = FALSE}
 #remove the influencial outliers.
@@ -441,11 +439,11 @@ After analysing the condition numbers and the VIFs from this model we were able 
 
 The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3041 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
 
-```{r Check Assumptions, echo=FALSE,out.height='70%',out.width='70%'}
+```{r Check Assumptions, echo=FALSE,out.height='70%',out.width='70%', fig.cap = "Checking the model assumptions of the BICModel4"}
 par(mar=c(1.8, 4.4, 2, 1.8))
-par(mfrow=c(2,2))
-for (i in (1:4)) {
-  plot(BICmodel4,i, cex=0.5)
+par(mfrow=c(1,2))
+  plot(BICmodel4,1, cex=0.5)
+  plot(BICmodel4,3, cex=0.5)
 }
 ```
 
@@ -466,7 +464,7 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cance
 
 Using the transformations discussed we first ran an LAR algorithm to obtain coefficients of our variables for different values of the penalty parameter, lambda. Figure ? shows a plot of these values against log(lambda).
 
-```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%'} 
+```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%', fig.cap = "Needs to be done"} 
 par(mfrow = c(1,1))
 plot(LASSO, "lambda", label = T)
 abline(v = log(cvLASSO$lambda.min), col = "blue")
@@ -477,7 +475,7 @@ We also performed cross validation to see how the mean squared error changes wit
 
 **Model Diagnostics**
 The residuals vs fitted plot suggests our model is nicely linear and the scale-location plot suggests homoscedastic residuals.  
-```{r, echo = FALSE, fig.width=9 , fig.height=2.25}
+```{r, echo = FALSE, fig.width=9 , fig.height=2.25, fig.cap = "Needs to be done"}
 par(mfrow = c(1,2),mar=c(1.8, 4.4, 1.8, 1.9))
 bin <- scale(LASSOresiduals)
 bin1 <- which(bin < 0)
@@ -493,7 +491,7 @@ We also computed the variance inflation factors which returned a VIF no higher t
 ## Ridge Regression
 Due to multicollinearity existing in the model we will perform a ridge regression, this will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 
 
-``` {r ridge, echo = FALSE, eval = FALSE}
+``` {r ridge, include = FALSE}
 set.seed(3041)
 ridge.fit <- cv.glmnet(model.matrix(Model3), cancer5$deathRate, alpha = 0, nrow = 3041)
 

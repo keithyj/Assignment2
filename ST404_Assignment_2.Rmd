@@ -716,15 +716,6 @@ model <- train(deathRate~0+incidenceRate+povertyPercent+PctUnemployed16_Over+
 print(model)
 ```
 
-
-```{r Cross validationAppendix, eval=FALSE}
-#Included in Statistical methodology
-crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))
-rownames(crossVal)=c('BIC stepwise model')
-colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
-knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")
-```
-
 ## LASSO Regression
 ```{r, eval = FALSE}
 cancerLASSO <- cancer5[,-c(1,2,17)]

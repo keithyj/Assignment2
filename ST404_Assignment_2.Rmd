@@ -139,9 +139,9 @@ We look for outliers within our model, as well as seeing if the counties we remo
 
 Our findings are based off the preliminary EDA of the US Cancer Dataset.
 
-## Tidying the Data
+## Cleaning the Data
 
-As declared in the EDA, missing values exist in PctEmployed16_Over and extremely low values exist in AvgHouseholdSize. Many, 152, PctEmplyed16_Over observations are missing. We could fill in the missing values by predicting them using a linear model created by the other variables. However, the variable PctUnemployed16_Over is strongly negatively correlated with PctEmployed16_Over. Therefore, we choose to remove PctEmployed16_Over entirely to avoid collinearity with PctUnemployed16_Over, and to avoid increasing the variance of the model by performing further predictions of the missing values. We will also scale the values of AvgHouseholdSize between 0 and 0.1 by 100.
+Many, 152, PctEmployed16_Over observations are missing. We could fill in the missing observations by predicting them using a linear model created by the other variables. However, the variable PctUnemployed16_Over is strongly negatively correlated with PctEmployed16_Over. Therefore, we choose to remove PctEmployed16_Over entirely to avoid any issues with the missing observations and collinearity with PctUnemployed16_Over, and to avoid increasing the variance of the model by performing further predictions of the missing values. We will also scale the values of AvgHouseholdSize between 0 and 0.1 by 100.
 
 ``` {r ScaleColumn, include = FALSE}
 # Multiply values less than 0.1 by 100 and update column
@@ -152,7 +152,7 @@ cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSi
 #removing PctEmployed16_Over and binnedInc from the dataset used for modelling.
 cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 ```
-We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions [Divisions]. These regions are Northeast, Midwest, South and West.
+We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions [@Divisions]. These regions are Northeast, Midwest, South and West.
 
 ``` {r region variable, include=FALSE}
 #Split Geography into county and state
@@ -192,22 +192,16 @@ with(cancer, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab =
 with(cancer, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
 with(cancer, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
-The variables we will include in the initial model are those that show a relationship with deathRate. From the scatter plots it is not clear to see whether this is the case, so instead we will fit an initial model of the current data set and check the significance.
+The variables we will include in the initial model are those that show a relationship with deathRate. From the scatter plots we can observe that most variables show some type of relationship with deathRate. However, it is not clear to see whether any do not. For now, we will assume all predictor variables do and keep them in the model, especially as we have not yet tested for multicollinearity which could affect the model. We will soon do an analysis of variance to check the significance of the relationships between predictors and deathRate.
 
-``` {r adequacy, include = FALSE}
+``` {r adequacy, echo = FALSE}
 # Creating a linear model with all variables from the current dataset
 Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
-
-# Check the output of the model showing estimates and significance
-summary(Model0)
 ```
-
-We test the null hypothesis that there is no linear association between deathRate and povertyPercent, deathRate and medianAgeMale, and deathRate and PercentMarried. We check the p values for these which show 0.656,  0.936, 0.360, and 0.141, hence we fail to reject the null hypothesis. We will not remove any of these variables from the model at this moment in time as there could be underlying issues as to why they are not significant, such as multicollinearity. 
-
-We will assess the adequacy of the model by checking if the functional form of the model is correct. We will look at the residuals vs fitted and scale location plots for the untransformed full model below:
+We will check the adequacy of our initial model by looking at the residuals vs fitted and scale location plots to see if the model assumptions are fulfilled:
 
 
-``` {r, echo = FALSE, eval = TRUE,fig.height=1.8,fig.width=6}
+``` {r, echo = FALSE, eval = TRUE,fig.height=1.8,fig.width=6, fig.cap = "Checking for linearity and homoscedasticity of the initial model"}
 # Identify any heteroscedasticity and non-linearity
 par(mar=c(1.8, 4.4, 1.8, 1.9))
 par(mfrow=c(1,2))
@@ -215,7 +209,7 @@ plot(Model0, 1, cex=0.5)
 plot(Model0, 3, cex=0.5)
 ```
 
-We can see from the plots that there exists heteroscedasticity and non-linearity. We also notice from our initial EDA that some individual predictor variables are not linear and show signs of heteroscedascity, so we will need to perform some transformations of some variables. We do this by using Box-Cox and observations after trialling log transformations. We first transform the individual predictor variables to satisfy homoscedascity, these include the following transformations: $log$(PctBlack$+0.1$), incidenceRate^1.5^, PctUnemployed16_Over^0.5^ and  $log$(medIncome).
+We can see from the plots that there exists heteroscedasticity and non-linearity. We know that some predictor variables are violating model assumptions, so we will need to perform some transformations of some variables to fix these. We do this by using Box-Cox and observations after trialling log transformations. We first transform the predictor variables to satisfy homoscedascity, these include the following transformations: $log$(PctBlack$+0.1$), incidenceRate^1.5^, PctUnemployed16_Over^0.5^ and  $log$(medIncome).
 
 ```{r, include=FALSE}
 #Box cox Power transformation UDF
@@ -233,7 +227,7 @@ boxcox <- function(x, p){
 # Declare new dataframe from old
 cancer5=cancer
 #Scaling PctBlack 
-cancer5$PctBlack=cancer5$PctBlack + 0.1
+cancer5$PctBlack=(cancer5$PctBlack) + 0.1
 # Transformations
 cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
 cancer5$medIncome=log(cancer5$medIncome)
@@ -251,18 +245,18 @@ plot(lm(deathRate ~ medIncome, data = cancer5), 3)
 ```
 
 
-``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%'}
+``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%', fig.cap = "Showing the improved linearity and homoscedasticity of PctBlack and PctUnemployed16_Over"}
 par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(2,2))
-plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5,main="log(PctBlack) Residuals Fitted",caption="")
-plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5,main="log(PctBlack) Scale location",caption="")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctUnemplyed16^0.5 Residuals Fitted",caption="")
-plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemplyed16^0.5 Scale location",caption="")
+plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5,main="log(PctBlack) Residuals Fitted")
+plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5,main="log(PctBlack) Scale location")
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5,main="PctUnemployed16^0.5 Residuals Fitted")
+plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5,main="PctUnemployed16^0.5 Scale location")
 ```
 
-These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The new model presents linearity and the heteroscedascity has been reduced, but it still exists. This can be seen in the residual vs fitted and scale location plots of the full model with these transformations presented below. This could be due to influencial outliers.
+These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The two transformed variables that are not shown here are in the appendix. After transforming the varibales, we check the model assumptions for this updated model and notice the model assumptions are being violated, this could be due to influencial outliers.
 
-``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6}
+``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6, fig.cap = "The updated model shows signs of linearity and reduced heteroscedasticity"}
 # Creating updated model with transformed variables
 par(mar=c(1.8, 4.4, 1.8, 1.9))
 Model1 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer5)
@@ -273,11 +267,9 @@ plot(Model1, 1, cex=0.5)
 plot(Model1, 3,cex=0.5)
 ```
 
-
 #### Outliers  
 
-
-Outliers are not always a cause for concern: however, if they have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will go on to calculate if any outliers exist and if they have high leverage, then deduce if these are influencial by using residual leverage plots and DFBETAS.
+If outliers have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will calculate if any influencial outliers exist by using residual leverage plots and DFBETAS. Any DFBETA values greater than 0.4 and also outliers that have high leverage will be removed from the data.
 
 
 ``` {r CheckOutliers, include = FALSE}
@@ -289,7 +281,7 @@ ols_plot_dfbetas(Model1)
 # This plot shows that the observations 2682, 282, 166, 2727, and 2714 all have a DFBETA > 0.4.
 ```
 
-Observations 2682, 282, 166, 2727, 1490 and 2714 appear to be problematic appearing as high leverage, high outliers and also being influencial observations as shown by the DFBETAS > 0.4 we will declare this to be highly influencial and so remove these observations from our model. We investigated these further for the nature of the influence, our research reinforced our decision to remove as for example Union County, Florida is a county where prisoners with lung cancer are sent. **Need reference**.
+We declare the following observations to be influencial and we will remove these from our dataset: 2682, 282, 166, 2727, 1490 and 2714. We investigated the nature of these observation's influence further, our research reinforced our decision to remove as for example Union County, Florida is a county where prisoners with lung cancer are sent. **Need reference**.
 
 ``` {r removeoutliers, include = FALSE}
 #remove the influencial outliers.
@@ -307,15 +299,23 @@ plot(Model3)
 summary(cancer5)
 #Shows 3041 observations 
 ```
-We have 3041 observations in our sample space, this is large and so we can pay less attention to the errors being normally distributed as it is not a major concern. The new model shows linearity and improved homoscedascitity and so we check if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics and checking the p values for significance. The F statistic is high with a p-value <0.05. So, we can determine that our response variable has a relationship with at least one of the variables in the model and we can further test which model is the optimal model by testing for redundancy. We will spot this by comparing the summary statistics output with the scatter plots we saw in our EDA. 
+After removing these influential observations we have 3041 observations in our sample space, this is a large sample space and so we can pay less attention to the errors being normally distributed as it is not a major concern due to the likelihood of errors being large. 
+
+We check if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics and test the null hypothesis that there is no linear association between deathRate and all individual predictor variables. 
+
+``` {r summarymod3, include = FALSE}
+anova(Model3)
+```
+
+We focus on the relationships between deathRate and medianAgeMale, deathRate and medianAgeFemale, deathRate and PercentMarried, and deathRate and PctBlack, and deathRate and PctMarriedHouseholds. We observe the p-values for these which, respectively, show 0.656,  0.936, 0.360, and 0.141. As the p-value is above, 0.05 we fail to reject the null hypothesis for these relationships. All other predictor variables reject the null hypothesis. We do not yet remove any variables from the model as we first want to check any existing redundancies.
+
+So, we can determine that our response variable has a relationship with at least one of the variables in the model and we can further test which model is optimal by testing for redundancy. We will spot this by comparing the summary output with the scatter plots we saw in our EDA. 
 
 The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and PctEmpPrivCoverage, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent and PctBlack in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity. The other redundancy we see is that MedianAgeMale and MedianAgeFemale plot against deathRate does not correlate with the estimate in the summary statistic. These redundancies could be caused by multicollinearity.
 
-``` {r summarymod3, include = FALSE}
-summary(Model3)
-```
-
 ``` {r multicolliearity2, include = FALSE}
+#Showing the coefficients of the predictors and comparing with scatter plots
+summary(Model3)
 # Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
 par(mfrow = c(2,3))
 with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
@@ -341,7 +341,7 @@ library(olsrr)
 ols_coll_diag(Model3)
 #Look for low tolerance, VIF > 5 and condition index > 30
 ```
-This shows that MedianAgeMale, MedianAgeFemale, PctPublicCoverage, PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5, which indicates multicollinearity exists in the model. When looking at the condition index's (CI) above 30, the variance decomposition proportion (v.c.p) above 0.3, which we used as the cut off, establishes those variables which provide evidence of, to some degree, multicollinearity [ConditionIndex]. We notice eight CI's above 31 and six of these, with CI's equalling 679.76, 174.74, 124.7, 101.87, 80.46, 25.92, have some variables with v.c.p above 0.3. These are (from most significant CI to least): povertyPercent and medIncome; PctMarriedHouseholds, PercentMarried & AvgHouseholdSize; MedianAgeMale and MedianAgeFemale; PctMarriedHouseholds and PercentMarried; PctPrivateCoverage and Edu18_24; Edu18_24 and PctEmpPrivCoverage. When the v.c.p is bigger for a larger CI, this indicates the multicollinearity is more significant.
+This shows that MedianAgeMale, MedianAgeFemale, PctPublicCoverage, PctMarriedHouseholds, PctPrivateCoverage, PercentMarried, povertyPercent and medIncome all had VIF >5, which indicates multicollinearity exists in the model. When looking at the condition index's (CI) above 30, the variance decomposition proportion (v.c.p) above 0.3, which we used as the cut off, establishes those variables which provide evidence of, to some degree, multicollinearity [@ConditionIndex]. We notice eight CI's above 31 and six of these, with CI's equalling 679.76, 174.74, 124.7, 101.87, 80.46, 25.92, have some variables with v.c.p above 0.3. These are (from most significant CI to least): povertyPercent and medIncome; PctMarriedHouseholds, PercentMarried & AvgHouseholdSize; MedianAgeMale and MedianAgeFemale; PctMarriedHouseholds and PercentMarried; PctPrivateCoverage and Edu18_24; Edu18_24 and PctEmpPrivCoverage. When the v.c.p is bigger for a larger CI, this indicates the multicollinearity is more significant.
 
 ```{r, include=FALSE}
 #defining boxcox function

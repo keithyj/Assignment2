@@ -243,7 +243,7 @@ plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5)
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5)
 ```
 
-These transformations show evidence of homoscedasticity and linearity thus we will update the new model with the transformed variables. The three transformed variables that are not shown here are in the appendix. After transforming the variables, we check the model assumptions for this updated model and notice the model assumptions are being violated, this could be due to influential outliers - so we will check this.
+These transformations show evidence of homoscedasticity and linearity thus we will update the new model with the transformed variables. This is also true for the three transformed variables that are not shown here. After transforming the variables, we check the model assumptions for this updated model and notice the model assumptions are being violated, this could be due to influential outliers - so we will check this.
 
 ``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6, fig.cap = "The updated model shows signs of linearity and reduced heteroscedasticity"}
 # Creating updated model with transformed variables

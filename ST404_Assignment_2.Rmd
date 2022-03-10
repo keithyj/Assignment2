@@ -125,7 +125,7 @@ In the dataset we notice that some counties have significantly lower population 
  
 ### What are the major determinants of high mortality rates?
 
- ••• STILL NEED TO DO •••
+Major determinants of the death rate can be calculated by looking at the amount each variable can affect the overall death rate. We look only at the LASSO model because this is our final model. Within the LASSO model, the variable which has the most influence on the overall death rate is incidence rate, followed by median income, followed by the percentage of unemployed population, education coefficient, region and percentage of people with private health coverage, which all have a similar power over the death rate.
  
 ### Areas of the US with unusually low or high mortality rates that do not conform to the general pattern
  

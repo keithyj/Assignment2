@@ -48,7 +48,7 @@ All statements made in our findings are supported in our statistical methodology
 
 ## Data Cleaning
 
-Based on our previous EDA showing 152 missing observations in PctEmployed16_Over, and a high correlation between this variable and PctUnemployed16_Over, we decided to remove the PctEmployed16_Over column and ignore this for our analysis. This decision was favoured over removing the missing observation rows from the dataset as even though the dataset is large, it still contributes to more accurate analysis of the other variables. We also decided to scale the infeasibly small observations of AvgHouseholdSize (those less than 0.1) by 100. In order to account for different death rates found in different states within the US, we divided the US into 4 regions and allocated each county into one of these 4 regions. This variable, named 'Region' will then be used to construct a model. We noticed that medIncome and binnedInc are similar metrics and so we removed binnedInc from the data before we conducted any analysis. This is beacuase binnedInc is given as an interval for each county and so is not feasible to be directly used in the model.   
+Based on our previous EDA showing 152 missing observations in PctEmployed16_Over, and a high correlation between this variable and PctUnemployed16_Over, we decided to remove the PctEmployed16_Over column and ignore this for our analysis. This decision was favoured over removing the missing observation rows from the dataset as even though the dataset is large, it still contributes to more accurate analysis of the other variables. We also decided to scale the infeasibly small observations of AvgHouseholdSize (those less than 0.1) by 100. To account for different death rates found in different states within the US, we divided the US into 4 regions and allocated each county into one of these 4 regions. This variable, named 'Region' will then be used to construct a model. We noticed that medIncome and binnedInc are similar metrics and so we removed binnedInc from the data before we conducted any analysis. This is because binnedInc is given as an interval for each county and so is not feasible to be directly used in the model.   
 
 ## Multicollinearity
 
@@ -56,11 +56,11 @@ We notice multicollinearity between medIncome and percentPoverty, marriage and t
 
 ## Transformations
 
-Some transformations of the variables were completed in order to fulfil the model assumptions, mainly homoscesastiscity (constant variance of errors) and linearity. Transformations were kept to a minimum in order to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are: power transform incidenceRate and PctUnemployed16_Over as follows incidenceRate^1.5 and sqrt(PctUnemployed16_Over), also log transform PctBlack and medIncome.
+Some transformations of the variables were completed to fulfil the model assumptions, mainly homoscedasticity (constant variance of errors) and linearity. Transformations were kept to a minimum to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are power transform incidenceRate and PctUnemployed16_Over as follows incidenceRate^1.5 and sqrt(PctUnemployed16_Over), also log transform PctBlack and medIncome.
 
-## Outliers and Influencial Observations
+## Outliers and Influential Observations
 
-Several observations were identified as having a high leverage and after testing for influencial observations we declared that the following observations would be removed from the data to ensure the model was not impacted by outliers.
+Several observations were identified as having a high leverage and after testing for influential observations we declared that the following observations would be removed from the data to ensure the model was not impacted by outliers.
 
 \tiny
 ```{r Outlier Table, echo=FALSE}
@@ -100,7 +100,7 @@ There were issues with collinearity using this method, meaning lots of variables
 ### LASSO regression
 
 \normalsize
-Using LASSO variable selection we create a model which includes eight predictor variables including: those in the table below. We expected this as the scatter plots and summary of our initial model suggested they are significant with respect to death rate. with the exception of medIncome. We found this model to have good predictive power. The coefficients for each of these variables are as follows.
+Using LASSO variable selection, we create a model which includes eight predictor variables including: those in the table below. We expected this as the scatter plots and summary of our initial model suggested they are significant with respect to death rate except for medIncome. We found this model to have good predictive power. The coefficients for each of these variables are as follows.
 
 \tiny
 ```{r Model Table LASSO, echo = FALSE}
@@ -109,13 +109,13 @@ name=c('intercept','incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateC
        'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
 beta=c('387','0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
 transformation=c('intercept','incidenceRate^(1.5)','log(medIncome)','PctUnemploy16_Over^(0.5)','None','None','None','None','None','Npne')
-interpretation=c("If all other variabels were equal to zero death rate would be given as 387, we discus this further below","If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.01 assuming all other variables remain constant.", "If median income increases by a factor of x, death rate will increase by a factor of -23.54log(x) assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 2.49 assuming all other variables remain constant.","If percent private coverage increases by 1, death rate will increase by 0.127, assuming all other variables remain constant", "If percent public coverage increases by 1, death rate increases by 0.127, assuming all other variables remain constant.","If education score increases by one, death rate will decrease 8.22, assuming all other variables remain constant", "If a county belongs to a state in the North Ease region then death rate will decrease by 4.61", "If a count belongs to a state in the South region then death rate will increase by 3.73", "If a county belongs to a state in the West region then death rate will decrease by 12.4")       
+interpretation=c("If all other variables were equal to zero death rate would be given as 387, we discus this further below","If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.01 assuming all other variables remain constant.", "If median income increases by a factor of x, death rate will increase by a factor of -23.54log(x) assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 2.49 assuming all other variables remain constant.","If percent private coverage increases by 1, death rate will increase by 0.127, assuming all other variables remain constant", "If percent public coverage increases by 1, death rate increases by 0.127, assuming all other variables remain constant.","If education score increases by one, death rate will decrease 8.22, assuming all other variables remain constant", "If a county belongs to a state in the North Ease region then death rate will decrease by 4.61", "If a count belongs to a state in the South region then death rate will increase by 3.73", "If a county belongs to a state in the West region then death rate will decrease by 12.4")       
 modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=10,ncol=3))
 rownames(modelTable)=name
 colnames(modelTable)=c('Parameter estimate','Transformation','Interpretation')
 pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","right","right","center"), use.hyphening = TRUE)
 ```
-While it may not make sense to have a death rate greater than zero when all our other variables are equal to zero it would also not make sense to have values such as median income and incidence rate equal to zero. So for reasonable values of our parameters the output of this model is also reasonable.
+While it may not make sense to have a death rate greater than zero when all our other variables are equal to zero it would also not make sense to have values such as median income and incidence rate equal to zero. So, for reasonable values of our parameters the output of this model is also reasonable.
 
 ## Final Model
 \normalsize
@@ -127,7 +127,7 @@ DF
 ```
 
 ### Limitations
-Stepwise will often include more explanatory variables in the model to gain a better value of R^2^, and so explanatory power of the model. This results in a model which is not necessarily the best at predicting. LASSO also has limitations in that it does not account for multicollinearity, which is significant in our dataset, but this is also an issue in stepwise regression so LASSO is a lot better than stepwise regression. However, in our final model we see variables that are highly correlated with other variables in our dataset, this could be an issue due to some variables being removed by selection but potentially having a better predictive power than the variable included in the model. Moreover, some variables that are not included will ultimately provide greater explanatory to the model.
+Stepwise will often include more explanatory variables in the model to gain a better value of R^2^, and so explanatory power of the model. This results in a model which is not necessarily the best at predicting. LASSO also has limitations in that it does not account for multicollinearity, which is significant in our dataset, but this is also an issue in stepwise regression, so LASSO is a lot better than stepwise regression. However, in our final model we see variables that are highly correlated with other variables in our dataset, this could be an issue due to some variables being removed by selection but potentially having a better predictive power than the variable included in the model. Moreover, some variables that are not included will ultimately provide greater explanatory to the model.
 
 In the dataset we notice that some counties have significantly lower population than others, for example Kent County compared to Los Angeles (@County). This is an issue as they all have the same weightings on producing the final model, it would be better to weight these in the dataset accordingly. We also removed the percent of employed 18 and over, due to the missing data and its similarity to the percent of unemployed 18 and over. However, the employed variable with imputed values could be better for the model and show significance to the predictive power of the model.
 
@@ -213,7 +213,7 @@ plot(Model0, 1, cex=0.5)
 plot(Model0, 3, cex=0.5)
 ```
 
-We can see from the plots that there exists heteroscedasticity and non-linearity. We know that some predictor variables are violating model assumptions, so we will need to perform some transformations of some variables to fix these. We do this by using Box-Cox and observations after trialling log transformations. We first transform the predictor variables to satisfy homoscedascity, these include the following transformations: $log$(PctBlack$+0.1$), incidenceRate^1.5^, PctUnemployed16_Over^0.5^ and  $log$(medIncome).
+We can see from the plots that there exists heteroscedasticity and non-linearity. We know that some predictor variables are violating model assumptions, so we will need to perform some transformations of some variables to fix these. We do this by using Box-Cox and observations after trialling log transformations. We first transform the predictor variables to satisfy homoscedasticity, these include the following transformations: $log$(PctBlack$+0.1$), incidenceRate^1.5^, PctUnemployed16_Over^0.5^ and  $log$(medIncome).
 
 ```{r, include=FALSE}
 #Box cox Power transformation UDF
@@ -258,14 +258,14 @@ plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5)
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 3, cex=0.5)
 ```
 
-These transformations show evidence of homoscedascity and linearity thus we will update the new model with the transformed variables. The three transformed variables that are not shown here are in the appendix. After transforming the varibales, we check the model assumptions for this updated model and notice the model assumptions are being violated, this could be due to influencial outliers - so we will check this.
+These transformations show evidence of homoscedasticity and linearity thus we will update the new model with the transformed variables. The three transformed variables that are not shown here are in the appendix. After transforming the variables, we check the model assumptions for this updated model and notice the model assumptions are being violated, this could be due to influential outliers - so we will check this.
 
 ``` {r adequacy2, echo = FALSE, eval = TRUE, fig.height=1.8,fig.width=6, fig.cap = "The updated model shows signs of linearity and reduced heteroscedasticity"}
 # Creating updated model with transformed variables
 par(mar=c(1.8, 4.4, 1.8, 1.9))
 Model1 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer5)
 
-# Identify any heteroscedascity and non-linearity 
+# Identify any heteroscedasticity and non-linearity 
 par(mfrow=c(1,2))
 plot(Model1, 1, cex=0.5)
 plot(Model1, 3,cex=0.5)
@@ -273,7 +273,7 @@ plot(Model1, 3,cex=0.5)
 
 ## Outliers  
 
-If outliers have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will calculate if any influencial outliers exist by using residual leverage plots and DFBETAS. Any DFBETA values greater than 0.4 and also outliers that have high leverage will be removed from the data.
+If outliers have high influence, then they will need to be considered for removal. Influential outliers are those that effect the slope of the model. We will calculate if any influential outliers exist by using residual leverage plots and DFBETAS. Any DFBETA values greater than 0.4 and outliers that have high leverage will be removed from the data.
 
 
 ``` {r CheckOutliers, include = FALSE}
@@ -285,7 +285,7 @@ ols_plot_dfbetas(Model1)
 # This plot shows that the observations 2682, 282, 166, 2727, and 2714 all have a DFBETA > 0.4.
 ```
 
-We declare the following observations to be influencial and we will remove these from our dataset: 2682, 282, 166, 2727, 1490 and 2714. We investigated the nature of these observation's influence further, our research reinforced our decision to remove as for example Union County, Florida is a county where prisoners with lung cancer are sent (@Outliers).
+We declare the following observations to be influential and we will remove these from our dataset: 2682, 282, 166, 2727, 1490 and 2714. We investigated the nature of these observation's influence further, our research reinforced our decision to remove as for example Union County, Florida is a county where prisoners with lung cancer are sent (@Outliers).
 
 ``` {r removeoutliers, include = FALSE}
 #remove the influencial outliers.
@@ -303,7 +303,7 @@ plot(Model3)
 summary(cancer5)
 #Shows 3041 observations 
 ```
-After removing these influential observations we have 3041 observations in our sample space, this is a large sample space and so we can pay less attention to the errors being normally distributed as it is not a major concern due to the likelihood of errors being large. We can then check if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics and test the null hypothesis that there is no linear association between deathRate and all individual predictor variables. 
+After removing these influential observations, we have 3041 observations in our sample space, this is a large sample space and so we can pay less attention to the errors being normally distributed as it is not a major concern due to the likelihood of errors being large. We can then check if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics and test the null hypothesis that there is no linear association between deathRate and all individual predictor variables. 
 
 ``` {r summarymod3, include = FALSE}
 anova(Model3)
@@ -363,7 +363,7 @@ Before attempting to fit any models or try stepwise regression, we looked at wha
 
 **Stepwise Regression**
 
-We first attempted to use AIC but this returned a model with 9 variables in it as well as an intercept term. Despite the fact this model is a good explanation of the data, it is far from simple and would be more difficult to interpret properly. As a result we opted to go forward using BIC as this gave a heavier penalty for having more variables.
+We first attempted to use AIC but this returned a model with 9 variables in it as well as an intercept term. Despite the fact this model is a good explanation of the data, it is far from simple and would be more difficult to interpret properly. As a result, we opted to go forward using BIC as this gave a heavier penalty for having more variables.
 
 ```{r Define null and full models, include=FALSE}
 fullTransModel=lm(deathRate ~ Edu18_24 + medIncome + PctMarriedHouseholds + 
@@ -422,7 +422,7 @@ BICmodel4 = step(nullTransModel,direction='both',scope=formula(fullTransModel), 
 ols_coll_diag(BICmodel4)
 summary(BICmodel4)
 ```
-When completing stepwise regression, we found that there were issues with collinearity with the condition number was too high. We aimed to reduce it by removing variables that minimised that increase in the BIC value while aiming for a condtion number below 30, using our initial ideas to inform the changes. The table below shows how the model was altered at each change.
+When completing stepwise regression, we found that there were issues with collinearity with the condition number was too high. We aimed to reduce it by removing variables that minimised that increase in the BIC value while aiming for a condition number below 30, using our initial ideas to inform the changes. The table below shows how the model was altered at each change.
 
 \tiny
 ```{r Change log 1,echo=FALSE}
@@ -444,7 +444,7 @@ The condition number was now below 19 and the VIFs were all below 3.5. Consequen
 
 **Check Model Assumptions**
 
-The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3041 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
+The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedasticity. The errors in the Normal Q-Q plot, in the appendix, appear to fall away from the line in the tails but we have 3041 data points and so the normality in errors does not need to be followed as strictly. Finally, the Cook's Distance, in the appendix, plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
 
 ```{r Check Assumptions, echo=FALSE, fig.height = 2,fig.width = 6, fig.cap = "Checking the model assumptions of the BICModel4"}
 par(mar=c(1.8, 4.4, 2, 1.8))
@@ -490,7 +490,7 @@ plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values",
 (Standardised Residuals)",cex=0.5)
 plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
 ```
-This model also returns an R squared value of 0.4849. This model also had a mean squared error of 389.4. These all suggest a strong predictive power. Furthermore all the variables, with the exception of median income, which we included in our original model remained. This suggests this model has a strong explanatory power. 
+This model also returns an R squared value of 0.4849. This model also had a mean squared error of 389.4. These all suggest a strong predictive power. Furthermore, all the variables, with the exception of median income, which we included in our original model remained. This suggests this model has a strong explanatory power. 
 We also computed the variance inflation factors which returned a VIF no higher than 2 for each variable suggesting no issues with multicollinearity.
 
 
@@ -517,7 +517,7 @@ rsquared.ridge <- (1 - (rsquared2/rsquared1))
 rsquared.ridge
 ```
 
-We looked into ridge regression to help deal with any multicolineaity issues that may arise. Using this form of peanalised regresssion gives us a model with an R squared of 0.484 and a mean squared error of 378.5, which is low since ridge regression trades bias for a reduced variance. Given that the R squared isn't great in comparison to the model made using LASSO we opt to use other peanalilsed regression methods for greater simplicity and explanatory power.
+We investigated ridge regression to help deal with any multicollineaity issues that may arise. Using this form of penalised regression gives us a model with an R squared of 0.484 and a mean squared error of 378.5, which is low since ridge regression trades bias for a reduced variance. Given that the R squared isn't great in comparison to the model made using LASSO we opt to use other penalised regression methods for greater simplicity and explanatory power.
 
 ## Comparison of models found from variable selection
 
@@ -534,7 +534,7 @@ The table shows that the LASSO model has better predictive and explanatory power
 
 ## Major determinants of high mortality rates
 
-The major determinants we calculated by taking the range of the values that a variable can take and multiplying it by its coefficient. This gives the amount `deathRate` can fluctuate as a result of that particular variable. For example for incidence rate the amount it could affect `deathRate` was $(12849.580-2044.087)*0.01=109.04$. This was repeated for each variable. `incidenceRate` (109.04) was the highest followed by `medIncome` (40.42), then `PctUnemployed16_Over` (20.19), `Region` (15.4), `Edu18_24` (14.96), `PctPrivateCoverage` (14.85), `PctPublicCoverage` (6.77).
+The major determinants we calculated by taking the range of the values that a variable can take and multiplying it by its coefficient. This gives the amount `deathRate` can fluctuate because of that particular variable. For example, for incidence rate the amount it could affect `deathRate` was $(12849.580-2044.087)*0.01=109.04$. This was repeated for each variable. `incidenceRate` (109.04) was the highest followed by `medIncome` (40.42), then `PctUnemployed16_Over` (20.19), `Region` (15.4), `Edu18_24` (14.96), `PctPrivateCoverage` (14.85), `PctPublicCoverage` (6.77).
 
 \pagebreak
 

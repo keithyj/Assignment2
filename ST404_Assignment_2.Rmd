@@ -84,7 +84,7 @@ name=c('incidenceRate','povertyPercent','PctUnemployed16_ Over',
 transformation=c('incidenceRate^(1.5)','None','PctUnemployed16_Over^(0.5)','None','log(PctBlack+0.1)',
                 'None')
 beta=c('0.00768','1.53','4.71','0.556','2.02','0.858')
-interpretation=c("If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.00768 assuming all other variables remain constant.", "If poverty percent increases by 1, death rate increases by 1.53, assuming all other variables remain constant.", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 4.71 assuming all other variables remain constant.", "If percent public coverage increases by 1, death rate increases by 0.556, assuming all other variables remain constant.", "If (percent black + 1) increases by a factor of x, death rate will increase by 2.02log(x), assuming all other variables remain constant.", "If percent married increases by 1, death rate increases by 0.858, assuming all other variables remain constant.")
+interpretation=c("If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.00768 assuming all other variables remain constant.", "If poverty percent increases by 1, death rate increases by 1.53, assuming all other variables remain constant.", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 4.71 assuming all other variables remain constant.", "If percent public coverage increases by 1, death rate increases by 0.556, assuming all other variables remain constant.", "If (percent black + 0.1) increases by a factor of x, death rate will increase by 2.02log(x), assuming all other variables remain constant.", "If percent married increases by 1, death rate increases by 0.858, assuming all other variables remain constant.")
 modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=6,ncol=3))
 rownames(modelTable)=name
 colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
@@ -99,12 +99,15 @@ Using LASSO variable selection we create a model which includes eight predictor 
 ```{r Model Table LASSO, echo = FALSE}
 library(sylly)
 name=c('intercept','incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
-       'PctPublicCoverage','Edu18_24','RegionNortheast','RegionSouth','RegionWest')
+       'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
 beta=c('387','0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-modelTable=as.table(matrix(data=c(beta),nrow=10,ncol=1))
+transformation=c('intercept','incidenceRate^(1.5)','log(medIncome)','PctUnemployed16_Over^(0.5)','None','None','None','None','None','Npne')
+interpretation=c("If all other variabels were equal to zero death rate would be given as 387, we discus this further below","If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.01 assuming all other variables remain constant.", "If median income increases by a factor of x, death rate will increase by a factor of -23.54log(x) assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 2.49 assuming all other variables remain constant.","If percent private coverage increases by 1, death rate will increase by 0.127, assuming all other variables remain constant", "If percent public coverage increases by 1, death rate increases by 0.127, assuming all other variables remain constant.","If education score increases by one, death rate will decrease 8.22, assuming all other variables remain constant", "If a county belongs to a state in the North Ease region then death rate will decrease by 4.61", "If a count belongs to a state in the South region then death rate will increase by 3.73", "If a county belongs to a state in the West region then death rate will decrease by 12.4")       
+modelTable=as.table(matrix(data=c(interpretation,beta,interpretation),nrow=10,ncol=3))
 rownames(modelTable)=name
-colnames(modelTable)=c('Parameter estimate')
-pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
+colnames(modelTable)=c('Parameter estimate','Transformation','Interpretation')
+pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","right","right","center"), use.hyphening = TRUE)
+
 ```
 
 ## Final Model

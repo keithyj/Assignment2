@@ -390,8 +390,6 @@ ols_coll_diag(BICmodel1)
 summary(BICmodel1)
 ```
 
-Our first model for the BIC stepwise regression model had 6 variables in it which is a much easier to interpret than what the AIC suggested. However, the condition number was 265. This means that two of the rows in the condition matrix are near to liner combinations of each other and so we have an issue with collinearity. The output suggested that it was the median income and the intercept term. We initially thought that having an intercept term may not be the best approach going forward and so we removed it at this point.
-
 ```{r BIC Stepwise 2, include=FALSE}
 fullTransModel=lm(deathRate ~ 0 + Edu18_24 + medIncome + PctMarriedHouseholds + 
                     PctBlack + PctPublicCoverage + PctPrivateCoverage + 
@@ -405,8 +403,6 @@ ols_coll_diag(BICmodel2)
 summary(BICmodel2)
 ```
 
-Despite removing the intercept term, there were still collinearity issues between the median income, education coefficient and regions. Median income appeared to be a common theme and there were alternative measures of wealth available. As a result we removed median income from our full model and looked at if the collinearity was solved then.
-
 ```{r BIC Stepwise 3, include=FALSE}
 fullTransModel=lm(deathRate ~ 0 + Edu18_24 + PctMarriedHouseholds + 
                     PctBlack + PctPublicCoverage + PctPrivateCoverage + 
@@ -419,8 +415,6 @@ ols_coll_diag(BICmodel3)
 summary(BICmodel3)
 ```
 
-The condition number decreased but was still 65, which is too large. At this point the problematic variables were the regions, percentage of married households and the education coefficient. We decided that we would remove the regions since if a region has a higher death rate then this is usually captured by a higher incidence rate. As a result, we removed the regions from our full model and repeated the stepwise regression again.
-
 ```{r BIC Stepwise 4, include=FALSE}
 fullTransModel=lm(deathRate ~ 0 + Edu18_24 + PctMarriedHouseholds + 
                     PctBlack + PctPublicCoverage + PctPrivateCoverage + 
@@ -432,8 +426,25 @@ BICmodel4 = step(nullTransModel,direction='both',scope=formula(fullTransModel), 
 ols_coll_diag(BICmodel4)
 summary(BICmodel4)
 ```
+When completing stepwise regression, we found that there were issues with collinearity with the condition number was too high. We aimed to reduce it by removing variables that minimised that increase in the BIC value while aiming for a condtion number below 30, using our initial ideas to inform the changes. The table below shows how the model was altered at each change.
 
-After analysing the condition numbers and the VIFs from this model we were able to conclude that collinearity was no longer an issue. The condition number was below 19 and the VIFs were all below 3.5. Consequently, we decided that we could use this model as the model selected by stepwise regression.
+\tiny
+```{r Change log 1,echo=FALSE}
+changes=matrix(0,nrow=4,ncol=3)
+BICs=c(18188,18188,18227,18561)
+CondNos=c(264,250,63.8,19.2)
+Excluded=c('NA','Intercept','medIncome','Region')
+changes[,1]=Excluded
+changes[,2]=BICs
+changes[,3]=CondNos
+changes=as.table(changes)
+colnames(changes)=c('Removed variable','BIC','Condition Number')
+rownames(changes)=paste('Model no.',1:4)
+pander::pander(changes, caption = "Change log for the BIC model")
+```
+
+\normalsize
+The condition number was now below 19 and the VIFs were all below 3.5. Consequently, we decided that we could use this as our model selected by stepwise regression as collinearity was no longer an issue.
 
 **Check Model Assumptions**
 

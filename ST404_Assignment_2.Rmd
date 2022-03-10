@@ -444,7 +444,6 @@ par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(1,2))
   plot(BICmodel4,1, cex=0.5)
   plot(BICmodel4,3, cex=0.5)
-}
 ```
 
 ## LASSO

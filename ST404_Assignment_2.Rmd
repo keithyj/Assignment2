@@ -97,21 +97,22 @@ colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
 ```
 
 ### LASSO regression
-\normalsize
 
+\normalsize
 Using LASSO variable selection we create a model which includes eight predictor variables including: those in the table below. We expected this as the scatter plots and summary of our initial model suggested they are significant with respect to death rate. with the exception of medIncome. We found this model to have good predictive power. The coefficients for each of these variables are as follows.
+
 \tiny
 ```{r Model Table LASSO, echo = FALSE}
 library(sylly)
 name=c('intercept','incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
        'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
 beta=c('387','0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-transformation=c('intercept','incidenceRate^(1.5)','log(medIncome)','PctUnemployed16_Over^(0.5)','None','None','None','None','None','Npne')
+transformation=c('intercept','incidenceRate^(1.5)','log(medIncome)','PctUnemploy16_Over^(0.5)','None','None','None','None','None','Npne')
 interpretation=c("If all other variabels were equal to zero death rate would be given as 387, we discus this further below","If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.01 assuming all other variables remain constant.", "If median income increases by a factor of x, death rate will increase by a factor of -23.54log(x) assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 2.49 assuming all other variables remain constant.","If percent private coverage increases by 1, death rate will increase by 0.127, assuming all other variables remain constant", "If percent public coverage increases by 1, death rate increases by 0.127, assuming all other variables remain constant.","If education score increases by one, death rate will decrease 8.22, assuming all other variables remain constant", "If a county belongs to a state in the North Ease region then death rate will decrease by 4.61", "If a count belongs to a state in the South region then death rate will increase by 3.73", "If a county belongs to a state in the West region then death rate will decrease by 12.4")       
-modelTable=as.table(matrix(data=c(beta,transformation,interpretation),nrow=10,ncol=3))
+modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=10,ncol=3))
 rownames(modelTable)=name
 colnames(modelTable)=c('Parameter estimate','Transformation','Interpretation')
-pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","right","right","center"), use.hyphening = TRUE)
+pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","right","right","center"), use.hyphening = TRUE)
 ```
 While it may not make sense to have a death rate greater than zero when all our other variables are equal to zero it would also not make sense to have values such as median income and incidence rate equal to zero. So for reasonable values of our parameters the output of this model is also reasonable.
 
@@ -125,7 +126,7 @@ DF
 ```
 
 ### Limitations
-Stepwise will often include more explanatory variables in the model to gain a better value of R^2^, and so explanatory power of the model. This results in a model which is not necesarrily the best at predicting. LASSO also has limitations in that it does not account for multicollinearity, which is significant in our dataset, but this is also an issue in stepwise regression so LASSO is a lot better than stepwise regression. However, in our final model we see variables that are highly correlated with other variables in our dataset, this could be an issue due to some variables being removed by selection but potentially having a better predictive power than the variable included in the model. Moreover, some variables that are not included will ultimately provide greater explanatory to the model.
+Stepwise will often include more explanatory variables in the model to gain a better value of R^2^, and so explanatory power of the model. This results in a model which is not necessarily the best at predicting. LASSO also has limitations in that it does not account for multicollinearity, which is significant in our dataset, but this is also an issue in stepwise regression so LASSO is a lot better than stepwise regression. However, in our final model we see variables that are highly correlated with other variables in our dataset, this could be an issue due to some variables being removed by selection but potentially having a better predictive power than the variable included in the model. Moreover, some variables that are not included will ultimately provide greater explanatory to the model.
 
 In the dataset we notice that some counties have significantly lower population than others, for example Alaska compared to Los Angeles **Need Reference**. This is an issue as they all have the same weightings on producing the final model, it would be better to weight these in the dataset accordingly. We also removed the percent of employed 18 and over, due to the missing data and its similarity to the percent of unemployed 18 and over. However, the employed variable with imputed values could be better for the model and show significance to the predictive power of the model.
 
@@ -493,8 +494,8 @@ We also computed the variance inflation factors which returned a VIF no higher t
 
 
 
+
 ## Ridge Regression
-Due to multicollinearity existing in the model we will perform a ridge regression, this will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 
 
 ``` {r ridge, eval = FALSE, echo = FALSE}
 set.seed(3041)
@@ -515,7 +516,7 @@ rsquared.ridge <- (1 - (rsquared2/rsquared1))
 rsquared.ridge
 ```
 
-The Ridge regression produces a linear model with an R^2 value of 0.484, and a mean square error of 378.5, which will be a reduced value as the ridge regression has improved variance at the cost of increased bias in the model. The model still contains all predictor variables and so would be good to improve the predictive power of the model, but considering all variables are still included, an R^2 value of 4.84 is not great, and it will be better to use another penalized likelihood method such as LASSO.
+We looked into ridge regression to help deal with any multicolineaity issues that may arise. Using this form of peanalised regresssion gives us a model with an R squared of 0.484 and a mean squared error of 378.5, which is low since ridge regression trades bias for a reduced variance. Given that the R squared isn't great in comparison to the model made using LASSO we opt to use other peanalilsed regression methods for greater simplicity and explanatory power.
 
 ## Comparison of models found from variable selection
 

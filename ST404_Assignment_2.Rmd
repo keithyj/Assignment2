@@ -453,7 +453,7 @@ LASSOresiduals <- cancer5$deathRate - LASSOpredicted
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
 ```
 
-Using the transformations discussed we first ran an LAR algorithm to obtain coefficients of our variables for different values of the penalty parameter, lambda. Figure ? shows a plot of these values against log(lambda).
+Using the transformations discussed we first ran an LAR algorithm to obtain coefficients of our variables for different values of the penalty parameter, lambda. The below plot shows a plot of these values against log(lambda).
 
 ```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%', fig.cap = "Higher lambda gives more desirable model than minimal lambda"} 
 par(mfrow = c(1,1))
@@ -462,7 +462,7 @@ abline(v = log(cvLASSO$lambda.min), col = "blue")
 abline(v = log(cvLASSO$lambda.1se), col = "red")
 legend("bottomleft",legend=c("Minimum lambda", "1 standard error larger lambda"),lty=c(1,1),col=c("blue","red"), ins=0.05, bty = "n")
 ```
-We performed cross validation to see how the mean squared error changes with lambda. Both the minimising lambda and the lambda 1se away are shown in figure ?. We chose to use the value of lambda 1se away since using the minimising lambda leads to no parameters being shrunk to zero. A model including every parameter is undesirable, so we instead build our model using the value of lambda 1se above the minimum.  The model we get from this has the coefficients as seen in the findings section.  
+We performed cross validation to see how the mean squared error changes with lambda. Both the minimising lambda and the lambda 1se away are shown in the figure above. We chose to use the value of lambda 1se away since using the minimising lambda leads to no parameters being shrunk to zero. A model including every parameter is undesirable, so we instead build our model using the value of lambda 1se above the minimum.  The model we get from this has the coefficients as seen in the findings section.  
 
 **Model Diagnostics**
 The residuals vs fitted plot suggests our model is nicely linear and the scale-location plot suggests homoscedastic residuals.  

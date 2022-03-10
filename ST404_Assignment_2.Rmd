@@ -726,7 +726,7 @@ for (i in (1:4)) {
 ```{r, eval=FALSE}
 ctrl <- trainControl(method = "LOOCV")
 model <- train(deathRate~0+incidenceRate+povertyPercent+PctUnemployed16_Over+
-  PctPublicCoverage+PctBlack+Region,data=cancer2,method = "lm", trControl = ctrl)
+  PctPublicCoverage+PctBlack+PercentMarried,data=cancer2,method = "lm", trControl = ctrl)
 print(model)
 ```
 

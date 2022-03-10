@@ -107,16 +107,8 @@ colnames(modelTable)=c('Parameter estimate')
 pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","center"), use.hyphening = TRUE)
 ```
 
-
-
-### Ridge Regression
-\normalsize
-The ridge regression method keeps all variables in the final model and produces the following model:
-
-**Put RIDGE model here**
-
 ## Final Model
-
+\normalsize
 Our final model is produced by the LASSO variable selection method can be summarised in the table below. 
 
 ```{r,eval=FALSE,echo=FALSE}
@@ -124,24 +116,12 @@ DF <- data.frame(row.names=c(),coefficient=c(),p-value=c())
 DF
 ```
 
-
-### Analysis of the model
-
-Predictive power - 
-
-Explanatory power - 
-
-Simplicity - 
-
-Model plots - 
-
-```{r,eval=FALSE,echo=FALSE}
-par(mfrow=c(2,2))
-plot(model)
-```
 ### Limitations
+Stepwise will often include more explanatory variables in the model to gain a better value of R^2^, and so explanatory power of the model. This results in a model which is not necesarrily the best at predicting. LASSO also has limitations in that it does not account for multicollinearity, which is significant in our dataset, but this is also an issue in stepwise regression so LASSO is a lot better than stepwise regression. However, in our final model we see variables that are highly correlated with other variables in our dataset, this could be an issue due to some variables being removed by selection but potentially having a better predictive power than the variable included in the model. Moreover, some variables that are not included will ultimately provide greater explanatory to the model.
 
-Stepwise regression is not favoured over LASSO because LASSO has a better system of penalising results because it has a tuning parameter. Stepwise will often overfit the model to gain a better value of R^2^ and so you get an inflated R^2^ value. This results in a model which is not necesarrily the best at explaining or predicting the data. LASSO also has limitations in that it does not account for multicollinearity but this is also an issue in stepwise regression, so LASSO is a lot better than stepwise regression.
+In the dataset we notice that some counties have significantly lower population than others, for example Alaska compared to Los Angeles **Need Reference**. This is an issue as they all have the same weightings on producing the final model, it would be better to weight these in the dataset accordingly. We also removed the percent of employed 18 and over, due to the missing data and its similarity to the percent of unemployed 18 and over. However, the employed variable with imputed values could be better for the model and show significance to the predictive power of the model.
+
+
  
 ### What are the major determinants of high mortality rates?
 

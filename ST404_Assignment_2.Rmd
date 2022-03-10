@@ -526,6 +526,9 @@ knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC st
 ```
 The table shows that the LASSO model has better predictive and explanatory power through its R^2^ value and its mean squared error.
 
+## Major determinants of high mortality rates
+
+The major determinants we calculated by taking the range of the values that a variable can take and multiplying it by its coefficient. This gives the amount `deathRate` can fluctuate as a result of that particular variable. For example for incidence rate the amount it could affect `deathRate` was $(12849.580-2044.087)*0.01=109.04$. This was repeated for each variable. `incidenceRate` (109.04) was the highest followed by `medIncome` (40.42), then `PctUnemployed16_Over` (20.19), `Region` (15.4), `Edu18_24` (14.96), `PctPrivateCoverage` (14.85), `PctPublicCoverage` (6.77).
 
 ## Limitations and recommendations for improvements in future work
 

@@ -79,10 +79,8 @@ We looked for a model that had the following characteristics: simplicity, explan
 
 ### Stepwise selection
 
-There were issues with collinearity using this method, meaning lots of variables were removed. The model suggested by stepwise regression is shown below.
-
 \tiny
-```{r Model Table Step, echo=FALSE,message=FALSE}
+```{r Model Table Step, echo=FALSE,message=FALSE,warning=FALSE}
 library(sylly)
 name=c('incidenceRate','povertyPercent','PctUnemployed16_ Over',
        'PctPublicCoverage','PctBlack','PercentMarried')
@@ -95,6 +93,9 @@ rownames(modelTable)=name
 colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
   pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left", "right", "right", "center"), use.hyphening = TRUE)
 ```
+
+\normalsize
+There were issues with collinearity using this method, meaning lots of variables were removed. The model suggested by stepwise regression is shown above.
 
 ### LASSO regression
 

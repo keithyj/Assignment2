@@ -56,7 +56,7 @@ We notice multicollinearity between medIncome and percentPoverty, marriage and t
 
 ## Transformations
 
-Some transformations of the variables were completed to fulfil the model assumptions, mainly homoscedasticity (constant variance of errors) and linearity. Transformations were kept to a minimum to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are boxcox transformations os incidenceRate and PctUnemployed16_Over as follows (incidenceRate^1.5-1)/1.5 and (sqrt(PctUnemployed16_Over)-1)/0.5, also log transform PctBlack and medIncome.
+We tried to limit the number of transformation we used for simplicity. The transformations we used were a box cox transform of incidence rate and percent unemployed with p values 1.5 and 0.5 respectively. Also a log transform of PctBlack + 0.1 and medIncome.
 
 ## Outliers and Influential Observations
 

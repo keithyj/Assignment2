@@ -474,7 +474,7 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cance
 
 Using the transformations discussed we first ran an LAR algorithm to obtain coefficients of our variables for different values of the penalty parameter, lambda. Figure ? shows a plot of these values against log(lambda).
 
-```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%', fig.cap = "Using the higher lambda includes less parameters than minimal lambda, which includes all parameters"} 
+```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%', fig.cap = "Higher lambda gives more desirable model than minimal lambda"} 
 par(mfrow = c(1,1))
 plot(LASSO, "lambda", label = T)
 abline(v = log(cvLASSO$lambda.min), col = "blue")

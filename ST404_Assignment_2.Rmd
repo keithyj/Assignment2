@@ -529,7 +529,6 @@ The major determinants we calculated by taking the range of the values that a va
 <div id="refs"></div>
 
 \pagebreak
-
 # Appendix
 \tiny
 ## Cleaning the Data
@@ -569,17 +568,15 @@ par(mfrow = c(2,3))
 with(cancer, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
 with(cancer, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
 # The same code was used for all variables in the dataset.
-
 ```
 ``` {r adequacyAppendix, eval = FALSE}
 # Creating a linear model with all variables from the current dataset
-Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
+Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + 
+PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
 #We updated this model after transformations and named it Model1 with the data = cancer5
 # We again updated this model after removing influential observations and named it Model3.
-
 # Checking the output of the model to see significance
 summary(Model0)
-
 # Identify any heteroscedasticity and non-linearity in the initial model using residual vs fitted and scale location plots
 par(mar=c(1.2, 4.4, 1.2, 1.9))
 par(mfrow=c(1,2))
@@ -587,7 +584,6 @@ plot(Model0, 1, cex=0.5)
 plot(Model0, 3, cex=0.5)
 # We repeated this for Model1 to check if homoscedasticity and linearity have improved after transformations
 # We repeated this for Model3 to once again check the model assumptions.
-
 ```
 ## Updated Model with Transformed Predictors
 ```{r, eval=FALSE}
@@ -600,7 +596,6 @@ boxcox <- function(x, p){
     return((x^p - 1)/p)
   } 
 }
-
 # Declaring new dataframe from old
 cancer5=cancer
 #Scaling PctBlack to remove the issue of 0 values before log
@@ -610,7 +605,6 @@ cancer5$incidenceRate=boxcox(cancer5$incidenceRate, p = 1.5)
 cancer5$medIncome=log(cancer5$medIncome)
 cancer5$PctUnemployed16_Over=boxcox(cancer5$PctUnemployed16_Over, p = 0.5)
 cancer5$PctBlack=log(cancer5$PctBlack)
-
 #Check for any updated heteroscedascity and linearity in incidence rate and medIncome (not shown)
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 1)
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 3)
@@ -627,7 +621,6 @@ ols_plot_resid_lev(Model1)
 par(mfrow=c(2,2))
 ols_plot_dfbetas(Model1)
 # This plot shows the observations DFBETA which we have used to produce the table in the Outliers section. These are all outliers with DFBETA > 0.4
-
 #remove the influencial outliers in the dataset
 library(dplyr)
 cancer5 <-  slice(cancer5, -c(2682, 282, 166, 2727, 2714, 1490))
@@ -639,13 +632,13 @@ summary(cancer5)
 ``` {r summarymod3Appendix, eval = FALSE}
 # Use the summary of the current model and compare to scatter plots that show correlations to check for significance between predictors in the model with deathRate
 summary(Model3)
-
 # Look at scatter plots and compare weak positive correlations to the correlations shown in original plots.
 par(mfrow = c(2,3))
-with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24", cex.main = 1))
-with(cancer5, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2), main = "deathRate against PctMarriedHouseholds", cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~Edu18_24, ylab = "deathRate", xlab = "Edu18_24", lpars = list(col = "red", lwd = 2), main = "deathRate against Edu18_24"
+,cex.main = 1))
+with(cancer5, scatter.smooth(deathRate~PctMarriedHouseholds, ylab = "deathRate", xlab = "PctMarriedHouseholds", lpars = list(col = "red", lwd = 2)
+,main = "deathRate against PctMarriedHouseholds", cex.main = 1))
 # The same code was used for all predictor variables in Model 3
-
 ```
 
 ## Multicollinearity
@@ -686,7 +679,6 @@ summary(BICmodel1)
 # We did the same for BICmodel2 after adding an intercept term of 0 to the fullTransmodel and nullTransmodel.
 # We did the same for BICmodel3 after removing medIncome. 
 # We did the same for BICmodel4 after removing medIncome and Region. 
-
 #For BIC Stepwise 2
 fullTransModel=lm(deathRate ~ 0 + Edu18_24 + medIncome + PctMarriedHouseholds + 
                     PctBlack + PctPublicCoverage + PctPrivateCoverage + 
@@ -782,11 +774,10 @@ rsquared.ridge
 
 ```{r conformity, eval = FALSE}
 Conformity <- function(x){ #Calculating residuals for one county, using raw dataset with PctEmployed16_Over removed
-  return(cancer[x,17]-(387+0.01*boxcox(cancer[x,3],1.5)-23.5*log(cancer[x,4])+2.49*boxcox(cancer[x,10],0.5)-0.212*cancer[x,11]+0.127*cancer[x,13]-8.22*cancer[x,16]-4.61*(cancer[x,18]=="NorthEast")+3.73*(cancer[x,18]=="South")-12.4*(cancer[x,18]=="West")))#Calculating residuals
+  return(cancer[x,17]-(387+0.01*boxcox(cancer[x,3],1.5)-23.5*log(cancer[x,4])+2.49*boxcox(cancer[x,10],0.5)-0.212*cancer[x,11]+0.127*cancer[x,13]-8.22*cancer[x,16]
+-4.61*(cancer[x,18]=="NorthEast")+3.73*(cancer[x,18]=="South")-12.4*(cancer[x,18]=="West")))#Calculating residuals
 }
-
 c(Conformity(282),Conformity(1490),Conformity(2714),Conformity(166),Conformity(2727),Conformity(2682)) #Residuals of points removed in data cleaning
-
 ConformityStates<-function(){ #Calculating average residual across all counties for a single state
   out<-rep(0,51)
   j<-1
@@ -797,6 +788,7 @@ ConformityStates<-function(){ #Calculating average residual across all counties 
   return(out)
 }
 ```
+
 \pagebreak
 
 # Authors' Contributions

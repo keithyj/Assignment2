@@ -56,7 +56,7 @@ We notice multicollinearity between medIncome and percentPoverty, marriage and t
 
 ## Transformations
 
-Some transformations of the variables were completed to fulfil the model assumptions, mainly homoscedasticity (constant variance of errors) and linearity. Transformations were kept to a minimum to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are power transform incidenceRate and PctUnemployed16_Over as follows incidenceRate^1.5 and sqrt(PctUnemployed16_Over), also log transform PctBlack and medIncome.
+Some transformations of the variables were completed to fulfil the model assumptions, mainly homoscedasticity (constant variance of errors) and linearity. Transformations were kept to a minimum to keep the model as simple as possible. One of our transformations required us to first scale PctBlack by 0.1. Hence, the transformations we use for building a model are boxcox transformations os incidenceRate and PctUnemployed16_Over as follows (incidenceRate^1.5-1)/1.5 and (sqrt(PctUnemployed16_Over)-1)/0.5, also log transform PctBlack and medIncome.
 
 ## Outliers and Influential Observations
 
@@ -84,10 +84,10 @@ We looked for a model that had the following characteristics: simplicity, explan
 library(sylly)
 name=c('incidenceRate','povertyPercent','PctUnemployed16_ Over',
        'PctPublicCoverage','PctBlack','PercentMarried')
-transformation=c('incidenceRate^(1.5)','None','PctUnemployed16_Over^(0.5)','None','log(PctBlack+0.1)',
+transformation=c('(incidenceRate^(1.5)-1)/1.5','None','(PctUnemployed16_Over^(0.5)-1)/0.5','None','log(PctBlack+0.1)',
                 'None')
 beta=c('0.00768','1.53','4.71','0.556','2.02','0.858')
-interpretation=c("If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.00768 assuming all other variables remain constant.", "If poverty percent increases by 1, death rate increases by 1.53, assuming all other variables remain constant.", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 4.71 assuming all other variables remain constant.", "If percent public coverage increases by 1, death rate increases by 0.556, assuming all other variables remain constant.", "If (percent black + 0.1) increases by a factor of x, death rate will increase by 2.02log(x), assuming all other variables remain constant.", "If percent married increases by 1, death rate increases by 0.858, assuming all other variables remain constant.")
+interpretation=c("If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5 with a small error due to the boxcox transform, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.00512 assuming all other variables remain constant.", "If poverty percent increases by 1, death rate increases by 1.53, assuming all other variables remain constant.", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5 with a small error due to the boxcox transform, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 9.42 assuming all other variables remain constant.", "If percent public coverage increases by 1, death rate increases by 0.556, assuming all other variables remain constant.", "If (percent black + 0.1) increases by a factor of x, death rate will increase by 2.02log(x), assuming all other variables remain constant.", "If percent married increases by 1, death rate increases by 0.858, assuming all other variables remain constant.")
 modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=6,ncol=3))
 rownames(modelTable)=name
 colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
@@ -108,13 +108,14 @@ library(sylly)
 name=c('intercept','incidenceRate','medIncome','PctUnemploy16_Over','PctPrivateCoverage',
        'PctPublicCoverage','Edu18_24','RegionNorthaast','RegionSouth','RegionWest')
 beta=c('387','0.010','-23.5','2.49','-0.212','0.127','-8.22','-4.61','3.73','-12.4')
-transformation=c('intercept','incidenceRate^(1.5)','log(medIncome)','PctUnemploy16_Over^(0.5)','None','None','None','None','None','Npne')
-interpretation=c("If all other variables were equal to zero death rate would be given as 387, we discus this further below","If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.01 assuming all other variables remain constant.", "If median income increases by a factor of x, death rate will increase by a factor of -23.54log(x) assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 2.49 assuming all other variables remain constant.","If percent private coverage increases by 1, death rate will increase by 0.127, assuming all other variables remain constant", "If percent public coverage increases by 1, death rate increases by 0.127, assuming all other variables remain constant.","If education score increases by one, death rate will decrease 8.22, assuming all other variables remain constant", "If a county belongs to a state in the North Ease region then death rate will decrease by 4.61", "If a count belongs to a state in the South region then death rate will increase by 3.73", "If a county belongs to a state in the West region then death rate will decrease by 12.4")       
+transformation=c('intercept','(incidenceRate^(1.5)-1)/1.5','log(medIncome)','(PctUnemployed16_Over^(0.5)-1)/0.5','None','None','None','None','None','Npne')
+interpretation=c("If all other variables were equal to zero death rate would be given as 387, we discus this further below","If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5 with a small error due to the boxcox transform, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.00512 assuming all other variables remain constant.", "If median income increases by a factor of x, death rate will increase by a factor of -23.54log(x) assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5 with a small error due to the boxcox transform, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 9.42 assuming all other variables remain constant.","If percent private coverage increases by 1, death rate will increase by 0.127, assuming all other variables remain constant", "If percent public coverage increases by 1, death rate increases by 0.127, assuming all other variables remain constant.","If education score increases by one, death rate will decrease 8.22, assuming all other variables remain constant", "If a county belongs to a state in the North Ease region then death rate will decrease by 4.61", "If a count belongs to a state in the South region then death rate will increase by 3.73", "If a county belongs to a state in the West region then death rate will decrease by 12.4")       
 modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=10,ncol=3))
 rownames(modelTable)=name
 colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
 pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","right","right","center"), use.hyphening = TRUE)
 ```
+
 While it may not make sense to have a death rate greater than zero when all our other variables are equal to zero it would also not make sense to have values such as median income and incidence rate equal to zero. So, for reasonable values of our parameters the output of this model is also reasonable.
 
 ## Final Model
@@ -209,7 +210,7 @@ plot(Model0, 1, cex=0.5)
 plot(Model0, 3, cex=0.5)
 ```
 
-We can see from the plots that there exists heteroscedasticity and non-linearity. We know that some predictor variables are violating model assumptions, so we will need to perform some transformations of some variables to fix these. We do this by using Box-Cox and observations after trialling log transformations. We first transform the predictor variables to satisfy homoscedasticity, these include the following transformations: $log$(PctBlack$+0.1$), incidenceRate^1.5^, PctUnemployed16_Over^0.5^ and  $log$(medIncome).
+We can see from the plots that there exists heteroscedasticity and non-linearity. We know that some predictor variables are violating model assumptions, so we will need to perform some transformations of some variables to fix these. We do this by using Box-Cox and observations after trialling log transformations. We first transform the predictor variables to satisfy homoscedasticity, these include the following transformations: $log$(PctBlack$+0.1$), boxcox incidenceRate with power 1.5, boxcox PctUnemployed16_Over with power 0.5 and  $log$(medIncome).
 
 ```{r, include=FALSE}
 #Box cox Power transformation UDF
@@ -518,6 +519,7 @@ We investigated ridge regression to help deal with any multicollineaity issues t
 ## Comparison of models found from variable selection
 
 To compare how well the models predict values we used leave one out cross validation (LOOCV). We ran this on the model suggested by BIC stepwise regression and the LASSO model and the summary is given in the table below.
+
 \tiny
 ```{r Cross validation, echo=FALSE}
 crossVal=as.table(matrix(data=c(20.98,16.09,0.4176,19.73,NA,0.4849),nrow=2,ncol=3,byrow = TRUE))

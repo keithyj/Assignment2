@@ -173,7 +173,7 @@ cancer$Region <-  factor(cancer$Region)
 ```
 Lastly, we choose to ignore binnedInc in our modelling process as it represents the same force as medIncome.
 
-## Modelling Flow
+## Modelling
 We observe the scatter plots of the individual variables against deathRate and fit an initial model based on these, as seen in previous EDA. 
 
 ``` {r redundancy, include = FALSE}
@@ -270,7 +270,7 @@ plot(Model1, 1, cex=0.5)
 plot(Model1, 3,cex=0.5)
 ```
 
-#### Outliers  
+## Outliers  
 
 If outliers have high influence then they will need to be considered for removal. Influencial outliers are those that effect the slope of the model. We will calculate if any influencial outliers exist by using residual leverage plots and DFBETAS. Any DFBETA values greater than 0.4 and also outliers that have high leverage will be removed from the data.
 
@@ -338,7 +338,7 @@ with(cancer5, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", x
 with(cancer5, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
 
-#### Multicollinearity
+## Multicollinearity
 ``` {r multicollinearity, include = FALSE}
 library(olsrr)
 ols_coll_diag(Model3)
@@ -358,7 +358,7 @@ boxcox <- function(x, p){
 }
 ```
 
-### Stepwise Regression
+## Stepwise Regression
 
 **Initial Ideas**
 

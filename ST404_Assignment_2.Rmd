@@ -181,13 +181,13 @@ with(cancer, scatter.smooth(deathRate~PercentMarried, ylab = "deathRate", xlab =
 with(cancer, scatter.smooth(deathRate~PctEmpPrivCoverage, ylab = "deathRate", xlab = "PctEmpPrivCoverage", lpars = list(col = "red", lwd = 2), main = "deathRate against PctEmpPrivCoverage", cex.main = 1))
 with(cancer, scatter.smooth(deathRate~PctUnemployed16_Over, ylab = "deathRate", xlab = "PctUnemployed16_Over", lpars = list(col = "red", lwd = 2), main = "deathRate against PctUnemployed16_Over", cex.main = 1))
 ```
-The variables we will include in the initial model are those that show a relationship with deathRate. From our initial EDA we can observe that most variables show some type of relationship with deathRate. However, it is not clear to see whether any do not. For now, we will assume all predictor variables do and keep them in the model, especially as we have not yet tested for multicollinearity which could affect the model. We will soon do an analysis of variance to check the significance of the relationships between predictors and deathRate.
+The variables we will include in the initial model are those that show a relationship with deathRate. From our initial EDA we can observe that most variables show some type of relationship with deathRate. However, it is not clear to see whether any do not. For now, we will assume all predictor variables do and keep them in the model, especially as we have not yet tested for multicollinearity which could affect the model. We will check the adequacy of our initial model by looking at the residuals vs fitted and scale location plots to see if the model assumptions are fulfilled:
 
 ``` {r adequacy, include = FALSE}
 # Creating a linear model with all variables from the current dataset
 Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + MedianAgeMale + MedianAgeFemale + AvgHouseholdSize + PercentMarried + PctBlack + PctMarriedHouseholds + PctPrivateCoverage + PctPublicCoverage + PctEmpPrivCoverage + PctUnemployed16_Over + Edu18_24, data = cancer)
 ```
-We will check the adequacy of our initial model by looking at the residuals vs fitted and scale location plots to see if the model assumptions are fulfilled:
+
 
 
 ``` {r, echo = FALSE, eval = TRUE,fig.height=2,fig.width=6, fig.cap = "Checking for linearity and homoscedasticity of the initial model"}

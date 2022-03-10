@@ -735,6 +735,8 @@ LASSOmodel <- glmnet(cancerLASSO, cancer5$deathRate, alpha = 1, lambda = cvLASSO
 LASSOpredicted <- predict(LASSOmodel, newx = cancerLASSO)
 LASSOresiduals <- cancer5$deathRate - LASSOpredicted
 LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
+#This block of code is everything needed to reproduce the LASSO coefficents found. It also defined the residuals, fitted values and R squared value for the 
+#corresponding model since LASSO just selects coefficents so such thing need to be done manually
 ```
 
 
@@ -744,6 +746,7 @@ plot(LASSO, "lambda", label = T)
 abline(v = log(cvLASSO$lambda.min), col = "blue")
 abline(v = log(cvLASSO$lambda.1se), col = "red")
 legend("bottomleft",legend=c("Minimum lambda", "1 standard error larger lambda"),lty=c(1,1),col=c("blue","red"), ins=0.05, bty = "n")
+#This plots log(lambda) against the coefficents for each variable calculated from LASSO regression
 ```
 
 ```{r, eval = FALSE}
@@ -753,7 +756,25 @@ bin1 <- which(bin < 0)
 bin[bin1] <- -bin[bin1]
 plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals",cex=0.5)
 plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
+#This gives the plots for residuals vs fitted and scale location plot for the model generated using LASSO coefficents.
 ```
+
+```{r, eval = FALSE}
+LASSOvif <- function(x){
+cancervif <- cancer5[,-c(1,2,17)]
+cancervif <- cancervif[,c("incidenceRate","medIncome","PctUnemployed16_Over","PctPrivateCoverage","PctPublicCoverage","Edu18_24","Region")]
+cancervif <- cancervif[,-x]
+cancervif <- model.matrix(~., data = cancervif)
+set.seed(105)
+cvLASSOvif <- cv.glmnet(cancervif, cancer5$deathRate, alpha = 1)
+LASSOmodelvif <- glmnet(cancervif, cancer5$deathRate, alpha = 1, lambda = cvLASSOvif$lambda.1se)
+LASSOresidualsvif <- cancer5$deathRate - predict(LASSOmodelvif, newx = cancervif)
+LASSO_Rsquaredvif <- 1 - (sum(LASSOresidualsvif^2)/sum((cancer5$deathRate - mean(cancer5$deathRate))^2))
+return(1/(1-LASSO_Rsquaredvif))
+}
+#The idea of this UDF is to find the VIF factor for the LASSO model. the input refers to the index of the coefficent being looked at.
+```
+
 
 ## Ridge Regression
 

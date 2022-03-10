@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 
 ```{r, include = FALSE}
 #Loading the data
-load('~/Downloads/cancer.rdata')
+load('cancer.rdata')
 attach(cancer)
 #Storing raw data
 cancerRaw <- cancer

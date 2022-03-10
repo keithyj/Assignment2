@@ -108,8 +108,8 @@ modelTable=as.table(matrix(data=c(interpretation,beta,interpretation),nrow=10,nc
 rownames(modelTable)=name
 colnames(modelTable)=c('Parameter estimate','Transformation','Interpretation')
 pander::pander(modelTable, caption = "Information on Stepwise Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","right","right","center"), use.hyphening = TRUE)
-
 ```
+While it may not make sense to have a death rate greater than zero when all our other variables are equal to zero it would also not make sense to have values such as median income and incidence rate equal to zero. So for reasonable values of our parameters the output of this model is also reasonable.
 
 ## Final Model
 \normalsize

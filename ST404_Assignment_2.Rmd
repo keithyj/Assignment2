@@ -359,7 +359,7 @@ boxcox <- function(x, p){
 
 **Initial Ideas**
 
-Before attempting to fit any models or try stepwise regression, we looked at what variables we thought would be most important in determining the death rate within a county. In summary, incidence rate is the most important followed by the type of insurance and an indicator of wealth. Also an intercept term does not make much sense as if there is no incidence rate then there should be no deaths. 
+Before attempting to fit any models or try stepwise regression, we looked at what variables we thought would be most and least important in determining the death rate within a county. In the EDA we saw `PctEmpPrivCoverage` was strongly correlated to `PctPrivateCoverage` so we excluded `PctEmpPrivCoverage`. in addition, the median age variables and `AvgHouseholdSize` had no relationship to death rate and had very high p-values in the full model so these were excluded from our initial stepwise full model.
 
 **AIC Stepwise Regression**
 
@@ -383,7 +383,7 @@ ols_coll_diag(AICmodel1)
 **BIC Stepwise Regression**
 
 ```{r BIC Stepwise 1, include=FALSE}
-BICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3040))
+BICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
 ols_coll_diag(BICmodel1)
 summary(BICmodel1)
 ```
@@ -398,7 +398,7 @@ fullTransModel=lm(deathRate ~ 0 + Edu18_24 + medIncome + PctMarriedHouseholds +
                   data = cancer5)
 nullTransModel=lm(deathRate~0,data=cancer5)
 
-BICmodel2 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3040))
+BICmodel2 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
 ols_coll_diag(BICmodel2)
 summary(BICmodel2)
 ```
@@ -412,7 +412,7 @@ fullTransModel=lm(deathRate ~ 0 + Edu18_24 + PctMarriedHouseholds +
                     incidenceRate + Region,
                   data = cancer5)
 
-BICmodel3 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3040))
+BICmodel3 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
 ols_coll_diag(BICmodel3)
 summary(BICmodel3)
 ```
@@ -426,7 +426,7 @@ fullTransModel=lm(deathRate ~ 0 + Edu18_24 + PctMarriedHouseholds +
                     incidenceRate,
                   data = cancer5)
 
-BICmodel4 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3040))
+BICmodel4 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
 ols_coll_diag(BICmodel4)
 summary(BICmodel4)
 ```
@@ -435,7 +435,7 @@ After analysing the condition numbers and the VIFs from this model we were able 
 
 **Check Model Assumptions**
 
-The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3040 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
+The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3041 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
 
 ```{r Check Assumptions, echo=FALSE,out.height='70%',out.width='70%'}
 par(mar=c(1.8, 4.4, 2, 1.8))
@@ -799,9 +799,9 @@ rsquared.ridge
 
 # Authors' Contributions
 
-``` {r Author's table, echo=FALSE}
-crossVal=as.table(matrix(data=c('Initial analysis before variable selection and model comparison','LASSO method section','Initial analysis before variable selection','Stepwise regression section'),nrow=2,ncol=3,byrow = TRUE))
+``` {r Author table, echo=FALSE}
+crossVal=as.table(matrix(data=c('Initial analysis before variable selection and model comparison','LASSO method section','Initial analysis before variable selection','Stepwise regression section'),nrow=4,ncol=1,byrow = TRUE))
 rownames(crossVal)=c('Conor','Daniel','James','Sam')
 colnames(crossVal)=c('Contribution')
-knitr::kable(crossVal, caption = "Authors' Contribution")
+knitr::kable(crossVal, caption = "Author Contribution")
 ```

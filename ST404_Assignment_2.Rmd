@@ -490,7 +490,7 @@ We also computed the variance inflation factors which returned a VIF no higher t
 ## Ridge Regression
 Due to multicollinearity existing in the model we will perform a ridge regression, this will not contribute to any variable selection but will instead improve the predictive power of the model by shrinking parameter estimates towards 0. 
 
-``` {r ridge, include = FALSE}
+``` {r ridge, eval = FALSE, echo = FALSE}
 set.seed(3041)
 ridge.fit <- cv.glmnet(model.matrix(Model3), cancer5$deathRate, alpha = 0, nrow = 3041)
 

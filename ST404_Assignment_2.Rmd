@@ -474,7 +474,7 @@ LASSO_Rsquared <- 1 - (sum(LASSOresiduals^2)/sum((cancer5$deathRate - mean(cance
 
 Using the transformations discussed we first ran an LAR algorithm to obtain coefficients of our variables for different values of the penalty parameter, lambda. Figure ? shows a plot of these values against log(lambda).
 
-```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%', fig.cap = "Needs to be done"} 
+```{r Cross Validation LASSO, echo = FALSE,out.height='50%',out.width='50%', fig.cap = "Using the higher lambda includes less parameters than minimal lambda, which includes all parameters"} 
 par(mfrow = c(1,1))
 plot(LASSO, "lambda", label = T)
 abline(v = log(cvLASSO$lambda.min), col = "blue")
@@ -485,7 +485,7 @@ We also performed cross validation to see how the mean squared error changes wit
 
 **Model Diagnostics**
 The residuals vs fitted plot suggests our model is nicely linear and the scale-location plot suggests homoscedastic residuals.  
-```{r, echo = FALSE, fig.width=9 , fig.height=2.25, fig.cap = "Needs to be done"}
+```{r, echo = FALSE, fig.width=9 , fig.height=2.25, fig.cap = "Residuals vs Fitted and Scale-Location Plots demonstrate no undesirable patters"}
 par(mfrow = c(1,2),mar=c(1.8, 4.4, 1.8, 1.9))
 bin <- scale(LASSOresiduals)
 bin1 <- which(bin < 0)

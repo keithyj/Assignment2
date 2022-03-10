@@ -6,6 +6,9 @@ output:
     toc_depth: 2
     number_sections: true
 fontsize: 11pt
+header-includes: 
+- \usepackage{graphicx}
+- \usepackage{float}
 linestretch: 1.5
 bibliography: References404.bib
 ---
@@ -16,13 +19,14 @@ knitr::opts_chunk$set(
 	fig.width = 7,
 	message = FALSE,
 	include = TRUE,
-	warnings = FALSE
+	warnings = FALSE,
+	fig.pos='H'
 )
 ```
 
 ```{r, include = FALSE}
 #Loading the data
-load('cancer.rdata')
+load('~/Downloads/cancer.rdata')
 attach(cancer)
 #Storing raw data
 cancerRaw <- cancer
@@ -141,11 +145,9 @@ We look for outliers within our model, as well as seeing if the counties we remo
 
 # Statistical Methodology
 
-Our findings are based off the preliminary EDA of the US Cancer Dataset.
-
 ## Cleaning the Data
 
-Many, 152, PctEmployed16_Over observations are missing. We could fill in the missing observations by predicting them using a linear model created by the other variables. However, the variable PctUnemployed16_Over is strongly negatively correlated with PctEmployed16_Over. Therefore, we choose to remove PctEmployed16_Over entirely to avoid any issues with the missing observations and collinearity with PctUnemployed16_Over, and to avoid increasing the variance of the model by performing further predictions of the missing values. We will also scale the values of AvgHouseholdSize between 0 and 0.1 by 100.
+Many, 152, PctEmployed16_Over observations are missing. We could fill the missing observations by prediction using a linear model created by the other variables. However, the variable PctUnemployed16_Over is strongly correlated with PctEmployed16_Over. Therefore, we choose to remove PctEmployed16_Over to avoid any issues with missing observations and collinearity, and to avoid increasing the variance of the model by performing further predictions of the missing values. We will also scale the values of AvgHouseholdSize between 0 and 0.1 by 100. We add a variable called "Region" which describes what observation the county is in. We split the US into 4 regions: Northeast, Midwest, South, and West [@Divisions]. Lastly, we choose to ignore binnedInc in our modelling process as it represents the same force as medIncome.
 
 ``` {r ScaleColumn, include = FALSE}
 # Multiply values less than 0.1 by 100 and update column
@@ -156,7 +158,6 @@ cancer$AvgHouseholdSize[cancer$AvgHouseholdSize <= 0.1] <- cancer$AvgHouseholdSi
 #removing PctEmployed16_Over and binnedInc from the dataset used for modelling.
 cancer <- subset(cancer, select=-c(PctEmployed16_Over, binnedInc))
 ```
-We add a variable describing the region in which observation the county is in. We split the US into 4 regions defined by the Census Bureau-designated regions and divisions [@Divisions]. These regions are Northeast, Midwest, South and West.
 
 ``` {r region variable, include=FALSE}
 #Split Geography into county and state
@@ -172,7 +173,6 @@ cancer <- cancer %>%
   #Setting the Region variable as a factor
 cancer$Region <-  factor(cancer$Region)
 ```
-Lastly, we choose to ignore binnedInc in our modelling process as it represents the same force as medIncome.
 
 ## Modelling
 ``` {r redundancy, include = FALSE}
@@ -203,7 +203,7 @@ Model0 <- lm(deathRate ~ Region + incidenceRate + medIncome + povertyPercent + M
 We will check the adequacy of our initial model by looking at the residuals vs fitted and scale location plots to see if the model assumptions are fulfilled:
 
 
-``` {r, echo = FALSE, eval = TRUE,fig.height=1.8,fig.width=6, fig.cap = "Checking for linearity and homoscedasticity of the initial model"}
+``` {r, echo = FALSE, eval = TRUE,fig.height=2,fig.width=6, fig.cap = "Checking for linearity and homoscedasticity of the initial model"}
 # Identify any heteroscedasticity and non-linearity
 par(mar=c(1.8, 4.4, 1.8, 1.9))
 par(mfrow=c(1,2))
@@ -238,7 +238,7 @@ cancer5$PctBlack=log(cancer5$PctBlack)
 
 ```
 
-``` {r checkingassumptions print, include = FALSE, eval = TRUE}
+``` {r checkingassumptions print, include = FALSE}
 #Check for any updated heteroscedascity and linearity
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 1)
 plot(lm(deathRate ~ incidenceRate, data = cancer5), 3)
@@ -249,7 +249,7 @@ plot(lm(deathRate ~ PctBlack, data = cancer5), 3, cex=0.5)
 ```
 
 
-``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%', fig.cap = "Showing the improved linearity and homoscedasticity of PctUnemployed16Over"}
+``` {r checkingassumptions, echo = FALSE, eval = TRUE,fig.height = 2, fig.cap = "Showing the improved linearity and homoscedasticity of PctUnemployed16Over"}
 par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(1,2))
 plot(lm(deathRate ~ PctUnemployed16_Over, data = cancer5), 1, cex=0.5)
@@ -301,19 +301,15 @@ plot(Model3)
 summary(cancer5)
 #Shows 3041 observations 
 ```
-After removing these influential observations we have 3041 observations in our sample space, this is a large sample space and so we can pay less attention to the errors being normally distributed as it is not a major concern due to the likelihood of errors being large. 
-
-We check if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics and test the null hypothesis that there is no linear association between deathRate and all individual predictor variables. 
+After removing these influential observations we have 3041 observations in our sample space, this is a large sample space and so we can pay less attention to the errors being normally distributed as it is not a major concern due to the likelihood of errors being large. We can then check if deathRate highly correlates to any of the explanatory variables by analysing the model's summary statistics and test the null hypothesis that there is no linear association between deathRate and all individual predictor variables. 
 
 ``` {r summarymod3, include = FALSE}
 anova(Model3)
 ```
 
-We focus on the relationships between deathRate and medianAgeMale, deathRate and medianAgeFemale, deathRate and PercentMarried, and deathRate and PctBlack, and deathRate and PctMarriedHouseholds. We observe the p-values for these which, respectively, show 0.656,  0.936, 0.360, and 0.141. As the p-value is above, 0.05 we fail to reject the null hypothesis for these relationships. All other predictor variables reject the null hypothesis. We do not yet remove any variables from the model as we first want to check any existing redundancies.
+We focus on the relationships between deathRate and medianAgeMale, medianAgeFemale, PercentMarried, PctBlack,and PctMarriedHouseholds. We observe the p-values for these which, respectively, show 0.656,  0.936, 0.360, and 0.141. As the p-value is above 0.05, we fail to reject the null hypothesis for these relationships. All other predictor variables reject the null hypothesis. We do not yet remove any variables from the model as we first want to check any existing redundancies.
 
-So, we can determine that our response variable has a relationship with at least one of the variables in the model and we can further test which model is optimal by testing for redundancy. We will spot this by comparing the summary output with the scatter plots we saw in our EDA. 
-
-The scatter plots show a negative correlation between deathRate and PctMarriedHouseholds and PctEmpPrivCoverage, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent and PctBlack in the summary statistics but clearly not in the plot. This shows there exists redundancy and can be explained potentially by any collinearity. The other redundancy we see is that MedianAgeMale and MedianAgeFemale plot against deathRate does not correlate with the estimate in the summary statistic. These redundancies could be caused by multicollinearity.
+We can determine that our response variable has a relationship with at least one of the variables in the model and we can further test which model is optimal by testing for redundancy. We will spot this by comparing the summary output with the scatter plots we saw in our EDA. They show a negative correlation between deathRate and PctMarriedHouseholds, and PctEmpPrivCoverage, which are not negative in the summary of the model. Moreover, the estimate is negative for PovertyPercent and PctBlack in the summary statistics but not in the plot. Also MedianAgeMale and MedianAgeFemale plots against deathRate that do not correlate with the estimate in the summary statistic. This shows there exists redundancy and can be explained by any multicollinearity.
 
 ``` {r multicolliearity2, include = FALSE}
 #Showing the coefficients of the predictors and comparing with scatter plots
@@ -363,7 +359,7 @@ boxcox <- function(x, p){
 
 Before attempting to fit any models or try stepwise regression, we looked at what variables we thought would be most and least important in determining the death rate within a county. In the EDA we saw `PctEmpPrivCoverage` was strongly correlated to `PctPrivateCoverage` so we excluded `PctEmpPrivCoverage`. in addition, the median age variables and `AvgHouseholdSize` had no relationship to death rate and had very high p-values in the full model so these were excluded from our initial stepwise full model.
 
-**AIC Stepwise Regression**
+**Stepwise Regression**
 
 We first attempted to use AIC but this returned a model with 9 variables in it as well as an intercept term. Despite the fact this model is a good explanation of the data, it is far from simple and would be more difficult to interpret properly. As a result we opted to go forward using BIC as this gave a heavier penalty for having more variables.
 
@@ -381,8 +377,6 @@ nullTransModel=lm(deathRate~1,data=cancer5)
 AICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel))
 ols_coll_diag(AICmodel1)
 ```
-
-**BIC Stepwise Regression**
 
 ```{r BIC Stepwise 1, include=FALSE}
 BICmodel1 = step(nullTransModel,direction='both',scope=formula(fullTransModel), k=log(3041))
@@ -450,7 +444,7 @@ The condition number was now below 19 and the VIFs were all below 3.5. Consequen
 
 The graphs below show that the Residuals vs Fitted plot and the Scale-Location plot look very slightly quadratic which is shown by the red line. However, the residuals appear to be randomly distributed around 0 and there seems to be no correlation between them. There also does not appear to be issues with heteroscedsticity. The errors in the Normal Q-Q plot appear to fall away from the line in the tails but we have 3041 data points and so the normality in errors does not need to be followed as strictly. Finally the Cook's Distance plot shows there are some points which had some influence but there was no justification for omitting them as an outlier.
 
-```{r Check Assumptions, echo=FALSE,out.height='70%',out.width='70%', fig.cap = "Checking the model assumptions of the BICModel4"}
+```{r Check Assumptions, echo=FALSE, fig.height = 2,fig.width = 6, fig.cap = "Checking the model assumptions of the BICModel4"}
 par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(1,2))
   plot(BICmodel4,1, cex=0.5)
@@ -481,17 +475,18 @@ abline(v = log(cvLASSO$lambda.min), col = "blue")
 abline(v = log(cvLASSO$lambda.1se), col = "red")
 legend("bottomleft",legend=c("Minimum lambda", "1 standard error larger lambda"),lty=c(1,1),col=c("blue","red"), ins=0.05, bty = "n")
 ```
-We also performed cross validation to see how the mean squared error changes with lambda. Both the minimising lambda and the lambda one standard error away are shown in figure ?. We chose to use the value of lambda one standard error away since using the minimising lambda leads to no parameters being shrunk to zero. A model including every parameter is undesirable so we instead build our model using the value of lambda one standard error above the minimum.  The model we get from this has the coefficients as seen in the findings section.  
+We performed cross validation to see how the mean squared error changes with lambda. Both the minimising lambda and the lambda 1se away are shown in figure ?. We chose to use the value of lambda 1se away since using the minimising lambda leads to no parameters being shrunk to zero. A model including every parameter is undesirable, so we instead build our model using the value of lambda 1se above the minimum.  The model we get from this has the coefficients as seen in the findings section.  
 
 **Model Diagnostics**
 The residuals vs fitted plot suggests our model is nicely linear and the scale-location plot suggests homoscedastic residuals.  
-```{r, echo = FALSE, fig.width=9 , fig.height=2.25, fig.cap = "Residuals vs Fitted and Scale-Location Plots demonstrate no undesirable patters"}
+```{r, echo = FALSE, fig.width=6 , fig.height=2, fig.cap = "Residuals vs Fitted and Scale-Location Plots demonstrate no undesirable patters"}
 par(mfrow = c(1,2),mar=c(1.8, 4.4, 1.8, 1.9))
 bin <- scale(LASSOresiduals)
 bin1 <- which(bin < 0)
 bin[bin1] <- -bin[bin1]
-plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "Square Root of Standardised Residuals",cex=0.5)
-plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted plot for LASSO model", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
+plot(LASSOpredicted, sqrt(bin), main = "Scale Location", xlab = "Fitted values", ylab = "sqrt
+(Standardised Residuals)",cex=0.5)
+plot(LASSOpredicted, LASSOresiduals, main = "Residuals vs Fitted", xlab = "Fitted values", ylab = "Residuals", cex=0.5)
 ```
 This model also returns an R squared value of 0.4849. This model also had a mean squared error of 389.4. These all suggest a strong predictive power. Furthermore all the variables, with the exception of median income, which we included in our original model remained. This suggests this model has a strong explanatory power. 
 We also computed the variance inflation factors which returned a VIF no higher than 2 for each variable suggesting no issues with multicollinearity.

@@ -510,7 +510,7 @@ To compare how well the models predict values we used leave one out cross valida
 
 \tiny
 ```{r Cross validation, echo=FALSE}
-crossVal=as.table(matrix(data=c(20.98,16.09,0.4176,19.73,NA,0.4849),nrow=2,ncol=3,byrow = TRUE))
+crossVal=as.table(matrix(data=c(20.98,16.09,0.4176,19.73,14.72,0.4849),nrow=2,ncol=3,byrow = TRUE))
 rownames(crossVal)=c('BIC stepwise model','LASSO Model')
 colnames(crossVal)=c('Root Mean Squared Error','Mean Absolute Error','R-Squared')
 knitr::kable(crossVal, caption = "Errors and goodness of fit measures for BIC stepwise regression model")

@@ -721,6 +721,15 @@ for (i in (1:4)) {
 ```
 
 ### Cross Validation of BIC Stepwise Model
+
+```{r}
+ctrl <- trainControl(method = "LOOCV")
+model <- train(deathRate~0+incidenceRate+povertyPercent+PctUnemployed16_Over+
+  PctPublicCoverage+PctBlack+Region,data=cancer2,method = "lm", trControl = ctrl)
+print(model)
+```
+
+
 ```{r Cross validationAppendix, eval=FALSE}
 #Included in Statistical methodology
 crossVal=as.table(matrix(data=c(20.98,16.09,0.4176),nrow=1,ncol=3,byrow = TRUE))

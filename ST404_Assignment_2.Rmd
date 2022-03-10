@@ -112,18 +112,16 @@ transformation=c('intercept','incidenceRate^(1.5)','log(medIncome)','PctUnemploy
 interpretation=c("If all other variables were equal to zero death rate would be given as 387, we discus this further below","If incidence rate increases by a factor of x, death rate increases by a factor of x^1.5, assuming all other variables are zero. If incidence rate^1.5 increases by 1, death rate increases by 0.01 assuming all other variables remain constant.", "If median income increases by a factor of x, death rate will increase by a factor of -23.54log(x) assuming all other variables remain constant", "If percent unemployed increases by a factor of x, death rate increases by a factor of x^0.5, assuming all other variables are zero. If percent unemplyed^0.5 increases by 1, death rate increases by 2.49 assuming all other variables remain constant.","If percent private coverage increases by 1, death rate will increase by 0.127, assuming all other variables remain constant", "If percent public coverage increases by 1, death rate increases by 0.127, assuming all other variables remain constant.","If education score increases by one, death rate will decrease 8.22, assuming all other variables remain constant", "If a county belongs to a state in the North Ease region then death rate will decrease by 4.61", "If a count belongs to a state in the South region then death rate will increase by 3.73", "If a county belongs to a state in the West region then death rate will decrease by 12.4")       
 modelTable=as.table(matrix(data=c(transformation,beta,interpretation),nrow=10,ncol=3))
 rownames(modelTable)=name
-colnames(modelTable)=c('Parameter estimate','Transformation','Interpretation')
+colnames(modelTable)=c('Transformation','Parameter estimate','Interpretation')
 pander::pander(modelTable, caption = "Information on LASSO Model", split.cell = 75, split.table = Inf, style = "grid", justify = c("left","right","right","center"), use.hyphening = TRUE)
 ```
 While it may not make sense to have a death rate greater than zero when all our other variables are equal to zero it would also not make sense to have values such as median income and incidence rate equal to zero. So, for reasonable values of our parameters the output of this model is also reasonable.
 
 ## Final Model
 \normalsize
-Our final model is produced by the LASSO variable selection method can be summarised in the table below. 
-
-```{r,eval=FALSE,echo=FALSE}
-DF <- data.frame(row.names=c(),coefficient=c(),p-value=c())
-DF
+Our final model is the LASSO model and is presented below
+```{=Latex}
+$deathRate=387+0.01\frac{incidenceRate^{1.5}-1}{1.5}-23.5\log(medIncome)+2.49\frac{PctUnemployed16\_Over^{0.5}-1}{0.5}-0.212PctPrivateCoverage+0.127PctPublicCoverage-8.22Edu18_24-4.61\alpha_S+3.73\alpha_{NE}-12.4\alpha_W$ where $\alpha_S,\alpha_{NE},\alpha_W$ are 1 if the county is in the south, northeast or west respecitvely and 0 otherwise.
 ```
 
 ### Limitations
@@ -812,7 +810,7 @@ rsquared.ridge
 ## Checking Conformity
 
 ```{r conformity, eval = FALSE}
-Conformity <- function(x){ #Calculating residuals for one county
+Conformity <- function(x){ #Calculating residuals for one county, using raw dataset with PctEmployed16_Over removed
   return(cancer[x,17]-(387+0.01*boxcox(cancer[x,3],1.5)-23.5*log(cancer[x,4])+2.49*boxcox(cancer[x,10],0.5)-0.212*cancer[x,11]+0.127*cancer[x,13]-8.22*cancer[x,16]-4.61*(cancer[x,18]=="NorthEast")+3.73*(cancer[x,18]=="South")-12.4*(cancer[x,18]=="West")))#Calculating residuals
 }
 

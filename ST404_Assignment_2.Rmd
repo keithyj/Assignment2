@@ -139,9 +139,7 @@ Major determinants of the death rate can be calculated by looking at the amount 
  
 ### Areas of the US with unusually low or high mortality rates that do not conform to the general pattern
  
- ••• STILL NEED TO DO •••
- 
-We look for outliers within our model, as well as seeing if the counties we removed for having high leverage initially conform to our model and therefore to the general pattern.  
+Including all outliers, we find that most states conform to our model, and therefore the general pattern, very well. However, death rates in Alaska are predicted to be 38.7 higher than the actual value on average per county. This is by far the most unconforming state. This may be caused by a lower sample size in terms of both population and number of counties.  All other states have a average prediction within 14 of the actual death rate across all counties and so mostly conform to the general pattern. In terms of individual counties, we find that Willamsburg City, Virginia;  Aleutians West Census, Alaska; North Slope Borough, Alaska, are the states with the highest residuals, with residuals over 90.  
 
 \pagebreak
 
@@ -810,6 +808,25 @@ rsquared2.ridge <- sum((predicteddeathRate.ridge - cancer5$deathRate)^2)
 
 rsquared.ridge <- (1 - (rsquared2/rsquared1))
 rsquared.ridge
+```
+## Checking Conformity
+
+```{r conformity, eval = FALSE}
+Conformity <- function(x){ #Calculating residuals for one county
+  return(cancer[x,17]-(387+0.01*boxcox(cancer[x,3],1.5)-23.5*log(cancer[x,4])+2.49*boxcox(cancer[x,10],0.5)-0.212*cancer[x,11]+0.127*cancer[x,13]-8.22*cancer[x,16]-4.61*(cancer[x,18]=="NorthEast")+3.73*(cancer[x,18]=="South")-12.4*(cancer[x,18]=="West")))#Calculating residuals
+}
+
+c(Conformity(282),Conformity(1490),Conformity(2714),Conformity(166),Conformity(2727),Conformity(2682)) #Residuals of points removed in data cleaning
+
+ConformityStates<-function(){ #Calculating average residual across all counties for a single state
+  out<-rep(0,51)
+  j<-1
+  for(i in unique(State)){
+    out[j]<-(sum(Conformity(as.numeric(rownames(cancer[State==i,])))))/length(cancer[State==i,1])
+    j<-j+1
+  }
+  return(out)
+}
 ```
 
 # Authors' Contributions

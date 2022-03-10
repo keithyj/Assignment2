@@ -245,7 +245,7 @@ plot(lm(deathRate ~ medIncome, data = cancer5), 3)
 ```
 
 
-``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%', fig.cap = "Showing the improved linearity and homoscedasticity of PctBlack and PctUnemployed16_Over"}
+``` {r checkingassumptions, echo = FALSE, eval = TRUE,out.height='80%',out.width='80%', fig.cap = "Showing the improved linearity and homoscedasticity of PctBlack and PctUnemployed16Over"}
 par(mar=c(1.8, 4.4, 2, 1.8))
 par(mfrow=c(2,2))
 plot(lm(deathRate ~ PctBlack, data = cancer5), 1, cex=0.5,main="log(PctBlack) Residuals Fitted")
